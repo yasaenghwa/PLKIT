@@ -4,7 +4,7 @@ const COLORS = {
   yellow: "#f7d16f",
 };
 
-function getCourseColor(code = "000") {
+function getMarketColor(code = "000") {
   const firstCode = code.charAt(0);
   switch (firstCode) {
     case 3:
@@ -20,4 +20,4 @@ function getCourseColor(code = "000") {
   }
 }
 
-export default getCourseColor;
+export default getMarketColor;

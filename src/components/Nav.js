@@ -19,12 +19,12 @@ function Nav() {
         </Link>
         <ul className={styles.menu}>
           <li>
-            <NavLink style={getLinkStyle} to="/courses">
+            <NavLink style={getLinkStyle} to="/markets">
               Market
             </NavLink>
           </li>
           <li>
-            <NavLink style={getLinkStyle} to="/questions">
+            <NavLink style={getLinkStyle} to="/communitys">
               Community
             </NavLink>
           </li>

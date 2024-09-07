@@ -11,39 +11,39 @@
   color: #878787;
 }
 
-.question,
+.community,
 .count,
 .answerItem {
   padding-right: 30px;
   padding-left: 30px;
 }
 
-.questionInfo {
+.communityInfo {
   display: flex;
   margin-bottom: 18px;
 }
 
-.questionInfo .content {
+.communityInfo .content {
   flex: 1;
 }
 
-.questionInfo .author {
+.communityInfo .author {
   flex: none;
 }
 
-.questionInfo .title {
+.communityInfo .title {
   margin-bottom: 10px;
   font-size: 14px;
   font-weight: 500;
   color: #494949;
 }
 
-.questionInfo .title .count {
+.communityInfo .title .count {
   margin-left: 5px;
   color: #fe92ab;
 }
 
-.questionInfo .date {
+.communityInfo .date {
   font-size: 12px;
   font-weight: 500;
   color: #c4c4c4;

@@ -1,4 +1,4 @@
-.courseList {
+.marketList {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
@@ -6,7 +6,7 @@
 }
 
 @media (max-width: 840px) {
-  .courseList {
+  .marketList {
     grid-template-columns: repeat(2, 1fr);
   }
 }

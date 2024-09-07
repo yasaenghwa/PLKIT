@@ -1,31 +1,31 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { deleteWishlist, getWishlist } from '../api';
-import Button from '../components/Button';
-import Container from '../components/Container';
-import CourseItem from '../components/CourseItem';
-import Warn from '../components/Warn';
-import closeButton from '../assets/closeButton.svg';
-import styles from './WishlistPage.module.css';
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { deleteWishlist, getWishlist } from "../api";
+import Button from "../components/Button";
+import Container from "../components/Container";
+import MarketItem from "../components/MarketItem";
+import Warn from "../components/Warn";
+import closeButton from "../assets/closeButton.svg";
+import styles from "./WishlistPage.module.css";
 
 function WishlistPage() {
-  const [courses, setCourses] = useState([]);
+  const [markets, setMarkets] = useState([]);
 
-  const handleDelete = (courseSlug) => {
-    deleteWishlist(courseSlug);
-    const nextCourses = getWishlist();
-    setCourses(nextCourses);
+  const handleDelete = (marketSlug) => {
+    deleteWishlist(marketSlug);
+    const nextMarkets = getWishlist();
+    setMarkets(nextMarkets);
   };
 
   useEffect(() => {
-    const nextCourses = getWishlist();
-    setCourses(nextCourses);
+    const nextMarkets = getWishlist();
+    setMarkets(nextMarkets);
   }, []);
 
   return (
     <Container className={styles.container}>
       <h1 className={styles.title}>나의 위시리스트</h1>
-      {courses.length === 0 ? (
+      {markets.length === 0 ? (
         <>
           <Warn
             className={styles.emptyList}
@@ -33,21 +33,21 @@ function WishlistPage() {
             description="카탈로그에서 나에게 필요한 코스를 찾아보세요."
           />
           <div className={styles.link}>
-            <Link to="/courses">
+            <Link to="/markets">
               <Button as="div">코스 찾아보기</Button>
             </Link>
           </div>
         </>
       ) : (
         <ul className={styles.items}>
-          {courses.map((course) => (
-            <li key={course.slug} className={styles.item}>
-              <CourseItem course={course} />
+          {markets.map((market) => (
+            <li key={market.slug} className={styles.item}>
+              <MarketItem market={market} />
               <img
                 className={styles.delete}
                 src={closeButton}
                 alt="닫기"
-                onClick={() => handleDelete(course.slug)}
+                onClick={() => handleDelete(market.slug)}
               />
             </li>
           ))}
