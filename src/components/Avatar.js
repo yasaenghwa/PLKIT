@@ -1,7 +1,16 @@
-import styles from './Avatar.module.css';
+//사용자의 아바타(프로필 사진)를 보여주는 역할
+import styles from "./Avatar.module.css";
+import defaultAvatarImage from "../assets/default-avatar.svg";
 
-function Avatar({ photo, name }) {
-  return <img className={styles.avatar} src={photo} alt={name} title={name} />;
+function Avatar({ className, size = "medium", src, alt, ...props }) {
+  return (
+    <img
+      className={`${styles.Avatar} ${styles[size]} ${className}`}
+      src={src || defaultAvatarImage}
+      alt={alt}
+      {...props}
+    />
+  );
 }
 
 export default Avatar;

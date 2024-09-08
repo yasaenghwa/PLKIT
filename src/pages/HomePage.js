@@ -3,8 +3,22 @@ import Container from "../components/Container";
 import Lined from "../components/Lined";
 import styles from "./HomePage.module.css";
 import landingImg from "../assets/landing.svg";
+import LogButton from "../components/LogButton";
+import Link from "../components/Link";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthProvider";
+import { useEffect } from "react";
 
 function HomePage() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/me");
+    }
+  }, [user, navigate]);
+
   return (
     <>
       <div className={styles.bg} />
@@ -21,7 +35,9 @@ function HomePage() {
             지금 함께 시작해보실래요?
           </p>
           <div>
-            <Button>지금 시작하기</Button>
+            <LogButton className={styles.CTA} as={Link} to="/login">
+              시작하기
+            </LogButton>
           </div>
         </div>
         <div className={styles.figure}>

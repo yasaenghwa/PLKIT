@@ -1,3 +1,4 @@
+/*
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import personIcon from '../assets/person.png';
@@ -41,3 +42,4 @@ function UserMenu() {
 }
 
 export default UserMenu;
+*/
