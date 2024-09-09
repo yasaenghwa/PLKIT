@@ -1,0 +1,55 @@
+.communityList {
+  margin-top: 20px;
+}
+
+.count {
+  margin: 20px 0;
+  font-size: 14px;
+  font-weight: 300;
+  color: #878787;
+}
+
+.emptyList {
+  margin: 40px auto;
+}
+
+.communityItem {
+  display: flex;
+  align-items: center;
+  padding: 19px 30px 20px;
+}
+
+.communityItem:not(:last-child) {
+  margin-bottom: 11px;
+}
+
+.communityItem .info {
+  flex: 1 1;
+}
+
+.communityItem .title {
+  margin: 0 auto 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #494949;
+}
+
+.communityItem .title a {
+  font-family: var(--notosans);
+}
+
+.communityItem .title .count {
+  margin-left: 5px;
+  color: #fe92ab;
+}
+
+.communityItem .date {
+  margin: 0;
+  font-size: 12px;
+  color: #c4c4c4;
+}
+
+.communityItem .writer {
+  flex: none;
+  margin-left: 30px;
+}
