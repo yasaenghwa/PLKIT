@@ -24,6 +24,66 @@ export function getCommunityById(communityId) {
   return communitys.find((community) => community.id === communityId);
 }
 
+/*
+// 고유한 ID 생성 함수
+function generateUniqueId(user) {
+  return `${user.id}-${Date.now()}`; // 사용자 ID와 현재 시간을 조합하여 고유 ID 생성
+}
+*/
+
+// 고유한 ID를 생성하는 함수 (예시)
+function generateUniqueId(user) {
+  return `${user.id}-${Date.now()}-${Math.random()
+    .toString(36)
+    .substring(2, 15)}`;
+}
+
+// 새로운 기능 추가: 게시글 추가하기
+export function addCommunity(title, content, user) {
+  // user 객체 로그 확인
+  console.log("addCommunity - user:", user);
+
+  // 현재 로그인한 사용자 정보 가져오기
+
+  if (!user) {
+    throw new Error("로그인이 필요합니다."); // 로그인이 되어 있지 않으면 오류 발생
+  }
+
+  // 새로운 게시글 객체 생성
+  const newCommunity = {
+    id: generateUniqueId(user), // 고유한 ID 생성    title,
+    title,
+    content,
+    writer: {
+      name: user.name, // 로그인한 사용자의 이름 사용
+      profile: { photo: user.profile?.photo || "profile.jpg" }, // 프로필 사진 확인
+    },
+    createdAt: new Date(),
+    answers: [],
+  };
+  // communitys 배열 업데이트 로그
+  console.log("Adding new community:", newCommunity);
+
+  // 중복된 게시글이 있는지 확인
+  const isDuplicate = communitys.some(
+    (community) => community.id === newCommunity.id
+  );
+
+  if (isDuplicate) {
+    console.warn("중복된 게시글이 발견되었습니다. 추가하지 않습니다.");
+    return; // 중복된 게시글이 있으면 추가하지 않음
+  }
+
+  // 기존 communitys에 새로운 게시글 추가
+  communitys.unshift(newCommunity);
+
+  // 업데이트된 communitys를 로컬 스토리지에 저장
+  localStorage.setItem("communitys", JSON.stringify(communitys));
+
+  // 새로운 게시글 반환 (필요에 따라)
+  return newCommunity;
+}
+
 const WISHLIST_KEY = "codethat-wishlist";
 const wishlist = JSON.parse(localStorage.getItem(WISHLIST_KEY) || "{}");
 
