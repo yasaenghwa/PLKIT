@@ -43,24 +43,31 @@ function CommunityListPage() {
   const [title, setTitle] = useState(""); // 새 게시글 제목 상태
   const [content, setContent] = useState(""); // 새 게시글 내용 상태
   const [communitys, setCommunitys] = useState([]); // 초기 상태를 빈 배열로 설정
-  // const [communitys, setCommunitys] = useState(getCommunitys(initKeyword)); // 상태를 사용해 게시글 관리
 
   const { user } = useAuth(); // 로그인한 사용자 정보를 가져옵니다.
 
+  // 검색어가 변경될 때마다 커뮤니티 게시글을 필터링하여 상태 업데이트
   useEffect(() => {
-    // 검색어(initKeyword)가 변경될 때마다 커뮤니티 게시글을 필터링하여 상태 업데이트
-    const filteredCommunitys = getCommunitys(initKeyword); // initKeyword를 기준으로 게시글을 가져옴
-    setCommunitys(filteredCommunitys); // 상태 업데이트
-  }, [initKeyword]); // initKeyword가 변경될 때마다 실행
-
-  /*
-  useEffect(() => {
-    // 로컬 스토리지에서 커뮤니티 게시글을 불러와 상태 업데이트
     const storedCommunitys =
       JSON.parse(localStorage.getItem("communitys")) || [];
-    setCommunitys(storedCommunitys);
+    const filteredCommunitys = initKeyword
+      ? storedCommunitys.filter((community) =>
+          community.title.toLowerCase().includes(initKeyword.toLowerCase())
+        )
+      : storedCommunitys;
+    setCommunitys(filteredCommunitys);
+  }, [initKeyword]);
+
+  // 로컬 스토리지에서 중복된 게시글을 제거하고 상태 업데이트
+  useEffect(() => {
+    const storedCommunitys =
+      JSON.parse(localStorage.getItem("communitys")) || [];
+    const uniqueCommunitys = Array.from(
+      new Set(storedCommunitys.map((item) => item.id))
+    ) // 중복된 게시글 ID 제거
+      .map((id) => storedCommunitys.find((item) => item.id === id));
+    setCommunitys(uniqueCommunitys);
   }, []);
-  */
 
   const handleKeywordChange = (e) => setKeyword(e.target.value);
   const handleTitleChange = (e) => setTitle(e.target.value); // 제목 변경 처리
@@ -72,7 +79,7 @@ function CommunityListPage() {
   };
 
   // 새 게시글 폼 제출 처리
-  const handlePostSubmit = (e) => {
+  const handlePostSubmit = async (e) => {
     e.preventDefault();
     console.log("게시물 등록 시도"); // 함수 호출 확인 로그
 
@@ -81,14 +88,27 @@ function CommunityListPage() {
       return;
     }
 
+    // 제목과 내용을 입력하지 않았을 경우 처리
+    if (!title || !content) {
+      alert("제목과 내용을 입력하세요.");
+      return;
+    }
+
     // 로그 추가: 중복 호출 확인
     console.log("handlePostSubmit 호출");
 
     try {
-      const newCommunity = addCommunity(title, content, user); // 새로운 게시글 추가
-      setCommunitys([newCommunity, ...communitys]); // 새 게시글을 리스트에 추가
-      setTitle(""); // 제목 초기화
-      setContent(""); // 내용 초기화
+      // addCommunity 함수 호출하여 새 게시글 추가
+      const newCommunity = await addCommunity(title, content, user);
+
+      // addCommunity 함수가 성공적으로 새로운 게시글을 반환했을 때만 상태 업데이트
+      if (newCommunity) {
+        setCommunitys((prevCommunitys) => [newCommunity, ...prevCommunitys]); // 새 게시글을 기존 목록에 추가
+        setTitle(""); // 제목 초기화
+        setContent(""); // 내용 초기화
+      } else {
+        console.warn("중복된 게시글이 발견되어 추가되지 않았습니다.");
+      }
     } catch (error) {
       console.error("게시글 작성 중 오류가 발생했습니다:", error);
       alert("게시글 작성 중 오류가 발생했습니다. 다시 시도해주세요.");

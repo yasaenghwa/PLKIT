@@ -67,13 +67,15 @@ function CommunityPage() {
 }
 
 function Writer({ className, writer }) {
+  // writer.avatar 확인을 위한 console.log
+  console.log("Writer component - writer.avatar:", writer.avatar);
+
   return (
     <div className={classNames(className, styles.writer)}>
       <div className={styles.info}>
         <div className={styles.name}>{writer.name}</div>
-        <div className={styles.level}>{writer.level}</div>
       </div>
-      <Avatar photo={writer.profile.photo} name={writer.name} />
+      <Avatar src={writer.profile.photo || "profile.jpg"} alt={writer.name} />
     </div>
   );
 }

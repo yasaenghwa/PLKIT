@@ -1,4 +1,5 @@
 import mock from "./mock.json";
+import { v4 as uuidv4 } from "uuid";
 const { markets, communitys } = mock;
 
 function filterByKeyword(items, keyword) {
@@ -24,20 +25,6 @@ export function getCommunityById(communityId) {
   return communitys.find((community) => community.id === communityId);
 }
 
-/*
-// 고유한 ID 생성 함수
-function generateUniqueId(user) {
-  return `${user.id}-${Date.now()}`; // 사용자 ID와 현재 시간을 조합하여 고유 ID 생성
-}
-*/
-
-// 고유한 ID를 생성하는 함수 (예시)
-function generateUniqueId(user) {
-  return `${user.id}-${Date.now()}-${Math.random()
-    .toString(36)
-    .substring(2, 15)}`;
-}
-
 // 새로운 기능 추가: 게시글 추가하기
 export function addCommunity(title, content, user) {
   // user 객체 로그 확인
@@ -51,12 +38,12 @@ export function addCommunity(title, content, user) {
 
   // 새로운 게시글 객체 생성
   const newCommunity = {
-    id: generateUniqueId(user), // 고유한 ID 생성    title,
+    id: uuidv4(), // UUID를 사용해 고유한 ID 생성 // generateUniqueId(user), // 고유한 ID 생성    title,
     title,
     content,
     writer: {
       name: user.name, // 로그인한 사용자의 이름 사용
-      profile: { photo: user.profile?.photo || "profile.jpg" }, // 프로필 사진 확인
+      profile: { photo: user.avatar || "profile.jpg" }, // 프로필 사진 확인
     },
     createdAt: new Date(),
     answers: [],
@@ -64,9 +51,11 @@ export function addCommunity(title, content, user) {
   // communitys 배열 업데이트 로그
   console.log("Adding new community:", newCommunity);
 
-  // 중복된 게시글이 있는지 확인
+  // 중복된 게시글이 있는지 확인 (ID뿐만 아니라 제목과 내용도 비교)
   const isDuplicate = communitys.some(
-    (community) => community.id === newCommunity.id
+    (community) =>
+      community.title === newCommunity.title &&
+      community.content === newCommunity.content
   );
 
   if (isDuplicate) {
