@@ -1,0 +1,13 @@
+pandas < 2.0
+numpy
+scikit-learn
+matplotlib
+pylint
+ruff
+torch
+torchvision
+xgboost
+darts
+autots
+black
+isort
