@@ -407,3 +407,51 @@ input[type="range"] {
 .largeChart {
   width: auto; /* 자동으로 차트의 폭이 설정되도록 */
 }
+
+.scrollContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.navBar {
+  width: 360px; /* 폭을 고정 */
+  height: 100vh; /* 전체 높이를 고정하여 화면 크기에 맞추기 */
+  background-color: #f5f5f5; /* 밝은 색상 적용 */
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); /* 은은한 그림자 효과 */
+  padding: 40px 15px; /* 패딩을 약간 증가시켜 더 넉넉하게 만듦 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px; /* 요소 간의 간격 */
+  position: relative;
+  z-index: 10; /* z-index 값을 높여 다른 콘텐츠 위에 오도록 설정 */
+}
+
+.logoContainer {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.logo {
+  width: 90%; /* 로고 크기 증가 */
+  height: auto;
+}
+
+.navButton {
+  display: block;
+  padding: 20px 30px; /* 버튼 패딩을 증가 */
+  color: #333;
+  background-color: #fff;
+  border-radius: 8px;
+  text-align: center;
+  text-decoration: none;
+  width: 100%;
+  font-size: 40px; /* 글꼴 크기 증가 */
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.navButton:hover {
+  background-color: #ddd;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2); /* 호버시 은은한 그림자 효과 */
+}

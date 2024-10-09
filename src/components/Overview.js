@@ -1,10 +1,11 @@
-//prediction의 값은 현재 더미 데이터로 구성되어있으니, ai 예측 데이터 생성시 업데이트 하겠습니다.
 import React, { useState } from "react";
 import { Heading } from "@enact/sandstone/Heading";
 import { Layout } from "@enact/ui/Layout";
 import { Cell as EnactCell } from "@enact/ui/Layout";
 import { Cell as RechartsCell } from "recharts";
-//import React from "react";
+import useSmartFarmData from "../hooks/useSmartFarmData"; // 커스텀 훅 가져오기
+import FloatingButton from "./FloatingButton"; // 모달리스 버튼 가져오기
+
 import {
   LineChart,
   Line,
@@ -21,12 +22,15 @@ import {
 } from "recharts";
 import styles from "../App/App.module.less"; // CSS를 module 형식으로 변경
 
-const Overview = ({ data }) => {
+const Overview = () => {
   // useState를 컴포넌트 최상위에서 호출
   const [tempHumSlide, setTempHumSlide] = useState(0);
   const [illuminationSlide, setIlluminationSlide] = useState(0);
   const [tdsSlide, setTdsSlide] = useState(0);
   const [liquidTempSlide, setLiquidTempSlide] = useState(0);
+
+  const { data } = useSmartFarmData(); // 데이터를 가져옵니다.
+
   if (
     !data ||
     !data.tempHumData ||
@@ -328,6 +332,7 @@ const Overview = ({ data }) => {
         </EnactCell>
         <div className={styles.divider}></div>
       </Layout>
+      <FloatingButton />
     </div>
   );
 };

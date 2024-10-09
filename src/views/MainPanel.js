@@ -1,20 +1,22 @@
 import kind from "@enact/core/kind";
 import ThemeDecorator from "@enact/sandstone/ThemeDecorator";
 import Panels from "@enact/sandstone/Panels";
-import { Scroller } from "@enact/sandstone/Scroller";
 import { Spottable } from "@enact/spotlight/Spottable";
 import SpotlightContainerDecorator from "@enact/spotlight/SpotlightContainerDecorator";
 import SpotlightRootDecorator from "@enact/spotlight/SpotlightRootDecorator";
+import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom"; // react-router-dom 가져오기
 
-import Dashboard from "../components/Dashboard"; // 기존의 Dashboard 컴포넌트를 가져옴
-
+import Overview from "../components/Overview"; // Overview 컴포넌트 가져오기
+import Control from "../components/Control"; // Control 컴포넌트 가져오기
+import FloatingButton from "../components/FloatingButton"; // 플로팅 버튼 임포트
+import logo from "../assets/logo.png"; // 로고 이미지 추가
 import css from "../App/App.module.less";
 
 // Spottable을 적용한 버튼
-const SpottableButton = Spottable("button");
+const SpottableButton = Spottable(Link); // Link 컴포넌트를 SpottableButton으로 만듭니다.
 
 // 네비게이션 컨테이너
-const Nav = SpotlightContainerDecorator("div");
+const Nav = SpotlightContainerDecorator("nav");
 
 const MainPanel = kind({
   name: "MainPanel",
@@ -25,36 +27,42 @@ const MainPanel = kind({
   },
 
   render: (props) => {
-    console.log("App component is rendering"); // 콘솔 로그 추가
     return (
-      <div {...props} className={css.scrollContainer}>
-        <Panels>
-          {/* 왼쪽 네비게이션 바와 오른쪽 콘텐츠 영역 */}
-          <div style={{ display: "flex", height: "100vh" }}>
-            {/* 왼쪽 네비게이션 바 */}
-            <Nav
-              style={{
-                width: "200px",
-                background: "#ccc",
-                padding: "10px",
-                flexShrink: 0,
-              }}
-            >
-              <SpottableButton className={css.navButton}>
-                Overview
-              </SpottableButton>
-              <SpottableButton className={css.navButton}>
-                Control
-              </SpottableButton>
-            </Nav>
+      <Router>
+        <div {...props} className={css.scrollContainer}>
+          <Panels>
+            {/* 왼쪽 네비게이션 바와 오른쪽 콘텐츠 영역 */}
+            <div style={{ display: "flex", height: "100vh" }}>
+              {/* 왼쪽 네비게이션 바 */}
+              <Nav className={css.navBar}>
+                {/* 로고 이미지 추가 */}
+                <div className={css.logoContainer}>
+                  <img src={logo} alt="PLKIT Logo" className={css.logo} />
+                </div>
 
-            {/* 오른쪽 콘텐츠 영역 - Scroller 적용 */}
-            <Scroller style={{ flexGrow: 1, overflowY: "auto" }}>
-              <Dashboard />
-            </Scroller>
-          </div>
-        </Panels>
-      </div>
+                {/* 라우팅을 위한 Link로 변경 */}
+                <SpottableButton to="/" className={css.navButton}>
+                  Overview
+                </SpottableButton>
+                <SpottableButton to="/control" className={css.navButton}>
+                  Control
+                </SpottableButton>
+              </Nav>
+
+              {/* 오른쪽 콘텐츠 영역 */}
+              <div style={{ flexGrow: 1, overflowY: "auto" }}>
+                <Routes>
+                  <Route path="/" element={<Overview />} />
+                  <Route path="/control" element={<Control />} />
+                </Routes>
+              </div>
+            </div>
+          </Panels>
+
+          {/* 플로팅 버튼 */}
+          <FloatingButton />
+        </div>
+      </Router>
     );
   },
 });
