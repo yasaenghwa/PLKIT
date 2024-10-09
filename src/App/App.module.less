@@ -6,6 +6,12 @@
   padding: 0;
 }
 
+/* App.module.less */
+.scrollContainer {
+  height: 100vh; /* 전체 화면 높이로 설정 */
+  overflow-y: visible; /* 세로 스크롤 활성화 */
+}
+
 .container {
   width: 90%;
   max-width: 1200px;
@@ -81,7 +87,7 @@
   height: 30px;
   background-color: lightgray;
   border-radius: 20px;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   align-items: center;
   border: 4px solid transparent;
@@ -379,4 +385,25 @@ input[type="range"] {
   height: 1px;
   background-color: #ccc;
   margin: 20px 0;
+}
+
+.container {
+  position: relative;
+  width: 340px;
+  height: 540px;
+  border-radius: 15px;
+  box-shadow: 1px 1px 10px #333333;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+/* 다른 스타일들도 추가 */
+.chartWrapper {
+  overflow-x: auto; /* 스크롤을 강제 적용 */
+  width: 100%;
+  white-space: nowrap; /* 차트가 가로로 길게 표시되도록 설정 */
+}
+
+.largeChart {
+  width: auto; /* 자동으로 차트의 폭이 설정되도록 */
 }

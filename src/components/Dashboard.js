@@ -3,8 +3,11 @@ import Overview from "./Overview";
 import Control from "./Control";
 import mqtt from "mqtt"; // mqtt 라이브러리 추가
 import styles from "../App/App.module.less"; // CSS를 module 형식으로 변경
+import FloatingButton from "./FloatingButton"; // 모달리스 버튼 가져오기
+import ChatGPTComponent from "./ChatGPTComponent"; // ChatGPT 컴포넌트 임포트import FloatingLayer from "@enact/ui/FloatingLayer"; // FloatingLayer 임포트
 
 const Dashboard = () => {
+  window.dispatchEvent(new Event("resize"));
   const [data, setData] = useState({
     tempHumData: null,
     waterLevelData: null,
@@ -26,30 +29,30 @@ const Dashboard = () => {
   const fetchData = async () => {
     try {
       const tempHumResponse = await fetch(
-        "http://52.79.219.88/dummy/status/temp_hum"
+        "http://13.209.126.231/dummy/status/temp_hum"
       );
       const tempHumData = await tempHumResponse.json();
 
       const waterLevelResponse = await fetch(
-        "http://52.79.219.88/dummy/status/water_level"
+        "http://13.209.126.231/dummy/status/water_level"
       );
       const waterLevelData = await waterLevelResponse.json();
 
       const illuminationResponse = await fetch(
-        "http://52.79.219.88/dummy/status/illumination"
+        "http://13.209.126.231/dummy/status/illumination"
       );
       const illuminationData = await illuminationResponse.json();
 
-      const tdsResponse = await fetch("http://52.79.219.88/dummy/status/tds");
+      const tdsResponse = await fetch("http://13.209.126.231/dummy/status/tds");
       const tdsData = await tdsResponse.json();
 
       const liquidTempResponse = await fetch(
-        "http://52.79.219.88/dummy/status/liquid_temp"
+        "http://13.209.126.231/dummy/status/liquid_temp"
       );
       const liquidTempData = await liquidTempResponse.json();
 
       const predictionResponse = await fetch(
-        "http://52.79.219.88/dummy/status/prediction"
+        "http://13.209.126.231/dummy/status/prediction"
       );
       const predictionData = await predictionResponse.json();
 
@@ -68,7 +71,7 @@ const Dashboard = () => {
 
   // MQTT 설정
   const mqttClient = mqtt.connect({
-    host: "52.79.219.88", // 브로커 IP 주소
+    host: "13.209.126.231", // 브로커 IP 주소
     port: 9001, // MQTT 브로커의 포트 (일반적으로 1883)
     protocol: "mqtt", // 프로토콜을 명시적으로 'mqtt'로 설정
   });
@@ -239,6 +242,8 @@ const Dashboard = () => {
         waterLevel={waterLevel}
         handleWaterLevelChange={handleWaterLevelChange}
       />
+      {/* 모달리스 버튼 추가 */}
+      <FloatingButton />
     </div>
   );
 };

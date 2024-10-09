@@ -1,4 +1,5 @@
 //prediction의 값은 현재 더미 데이터로 구성되어있으니, ai 예측 데이터 생성시 업데이트 하겠습니다.
+import React, { useState } from "react";
 import { Heading } from "@enact/sandstone/Heading";
 import { Layout } from "@enact/ui/Layout";
 import { Cell as EnactCell } from "@enact/ui/Layout";
@@ -21,6 +22,11 @@ import {
 import styles from "../App/App.module.less"; // CSS를 module 형식으로 변경
 
 const Overview = ({ data }) => {
+  // useState를 컴포넌트 최상위에서 호출
+  const [tempHumSlide, setTempHumSlide] = useState(0);
+  const [illuminationSlide, setIlluminationSlide] = useState(0);
+  const [tdsSlide, setTdsSlide] = useState(0);
+  const [liquidTempSlide, setLiquidTempSlide] = useState(0);
   if (
     !data ||
     !data.tempHumData ||
@@ -42,6 +48,30 @@ const Overview = ({ data }) => {
     predictionData,
   } = data;
 
+  // 데이터를 10개씩 나누기 위한 함수
+  const chunkedData = (data, size) => {
+    const result = [];
+    for (let i = 0; i < data.length; i += size) {
+      result.push(data.slice(i, i + size));
+    }
+    return result;
+  };
+
+  // 슬라이드로 표시할 데이터 나누기 (10개씩)
+  const tempHumDataChunks = chunkedData(tempHumData, 3);
+  const illuminationDataChunks = chunkedData(illuminationData, 10);
+  const tdsDataChunks = chunkedData(tdsData, 10);
+  const liquidTempDataChunks = chunkedData(liquidTempData, 10);
+
+  // 각 슬라이드 이전/다음으로 이동하는 함수
+  const prevSlide = (slide, setSlide, dataChunks) => {
+    if (slide > 0) setSlide(slide - 1);
+  };
+
+  const nextSlide = (slide, setSlide, dataChunks) => {
+    if (slide < dataChunks.length - 1) setSlide(slide + 1);
+  };
+
   const latestData = predictionData[predictionData.length - 1];
   const latestIndex = predictionData.length - 1;
 
@@ -52,7 +82,7 @@ const Overview = ({ data }) => {
         <EnactCell>
           <Heading showLine>Farm Air Temperature and Humidity</Heading>
           <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={tempHumData}>
+            <LineChart data={tempHumDataChunks[tempHumSlide]}>
               <XAxis dataKey="name" />
               <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
               <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
@@ -73,6 +103,22 @@ const Overview = ({ data }) => {
               />
             </LineChart>
           </ResponsiveContainer>
+          <button
+            onClick={() =>
+              prevSlide(tempHumSlide, setTempHumSlide, tempHumDataChunks)
+            }
+            disabled={tempHumSlide === 0}
+          >
+            Previous
+          </button>
+          <button
+            onClick={() =>
+              nextSlide(tempHumSlide, setTempHumSlide, tempHumDataChunks)
+            }
+            disabled={tempHumSlide === tempHumDataChunks.length - 1}
+          >
+            Next
+          </button>
         </EnactCell>
 
         <div className={styles.divider}></div>
@@ -100,7 +146,7 @@ const Overview = ({ data }) => {
         <EnactCell>
           <Heading showLine>Illumination</Heading>
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={illuminationData}>
+            <BarChart data={illuminationDataChunks[illuminationSlide]}>
               <XAxis dataKey="name" />
               <YAxis />
               <CartesianGrid stroke="#ccc" />
@@ -109,6 +155,30 @@ const Overview = ({ data }) => {
               <Bar dataKey="light" fill="#8884d8" />
             </BarChart>
           </ResponsiveContainer>
+          <button
+            onClick={() =>
+              prevSlide(
+                illuminationSlide,
+                setIlluminationSlide,
+                illuminationDataChunks
+              )
+            }
+            disabled={illuminationSlide === 0}
+          >
+            Previous
+          </button>
+          <button
+            onClick={() =>
+              nextSlide(
+                illuminationSlide,
+                setIlluminationSlide,
+                illuminationDataChunks
+              )
+            }
+            disabled={illuminationSlide === illuminationDataChunks.length - 1}
+          >
+            Next
+          </button>
         </EnactCell>
 
         <div className={styles.divider}></div>
@@ -116,7 +186,7 @@ const Overview = ({ data }) => {
         <EnactCell>
           <Heading showLine>TDS</Heading>
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={tdsData}>
+            <BarChart data={tdsDataChunks[tdsSlide]}>
               <XAxis dataKey="name" interval={0} tick={{ fontSize: 10 }} />
               <YAxis />
               <CartesianGrid stroke="#ccc" />
@@ -125,6 +195,18 @@ const Overview = ({ data }) => {
               <Bar dataKey="tds" fill="#8884d8" />
             </BarChart>
           </ResponsiveContainer>
+          <button
+            onClick={() => prevSlide(tdsSlide, setTdsSlide, tdsDataChunks)}
+            disabled={tdsSlide === 0}
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => nextSlide(tdsSlide, setTdsSlide, tdsDataChunks)}
+            disabled={tdsSlide === tdsDataChunks.length - 1}
+          >
+            Next
+          </button>
         </EnactCell>
 
         <div className={styles.divider}></div>
@@ -133,7 +215,7 @@ const Overview = ({ data }) => {
           <Heading showLine>Farm Liquid Temperature</Heading>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart
-              data={liquidTempData}
+              data={liquidTempDataChunks[liquidTempSlide]}
               margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
             >
               <XAxis dataKey="name" interval={0} tick={{ fontSize: 10 }} />
@@ -144,6 +226,30 @@ const Overview = ({ data }) => {
               <Line type="monotone" dataKey="temp" stroke="#8884d8" />
             </LineChart>
           </ResponsiveContainer>
+          <button
+            onClick={() =>
+              prevSlide(
+                liquidTempSlide,
+                setLiquidTempSlide,
+                liquidTempDataChunks
+              )
+            }
+            disabled={liquidTempSlide === 0}
+          >
+            Previous
+          </button>
+          <button
+            onClick={() =>
+              nextSlide(
+                liquidTempSlide,
+                setLiquidTempSlide,
+                liquidTempDataChunks
+              )
+            }
+            disabled={liquidTempSlide === liquidTempDataChunks.length - 1}
+          >
+            Next
+          </button>
         </EnactCell>
 
         <div className={styles.divider}></div>
