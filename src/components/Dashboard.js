@@ -71,9 +71,9 @@ const Dashboard = () => {
 
   // MQTT 설정
   const mqttClient = mqtt.connect({
-    host: "13.209.126.231", // 브로커 IP 주소
-    port: 9001, // MQTT 브로커의 포트 (일반적으로 1883)
-    protocol: "mqtt", // 프로토콜을 명시적으로 'mqtt'로 설정
+    host: process.env.REACT_APP_MQTT_HOST, // 브로커 IP 주소
+    port: parseInt(process.env.REACT_APP_MQTT_PORT, 10), // MQTT 브로커의 포트
+    protocol: process.env.REACT_APP_MQTT_PROTOCOL, // 프로토콜을 명시적으로 'mqtt'로 설정
   });
 
   // 수신된 메시지를 처리하는 부분 (handleMqttMessage)

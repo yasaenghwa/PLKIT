@@ -71,9 +71,9 @@ const useSmartFarmData = () => {
 
     // MQTT 설정
     mqttClient = mqtt.connect({
-      host: "13.209.126.231",
-      port: 9001,
-      protocol: "mqtt",
+      host: process.env.REACT_APP_MQTT_HOST,
+      port: parseInt(process.env.REACT_APP_MQTT_PORT, 10),
+      protocol: process.env.REACT_APP_MQTT_PROTOCOL,
     });
 
     const handleMqttMessage = (topic, message) => {
