@@ -1,4 +1,4 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import Container from "./Container";
 //import UserMenu from "./UserMenu";
 import logoImg from "../assets/logo.svg";
@@ -27,6 +27,12 @@ export function PublicNav() {
 
 function Nav() {
   const { user, logout } = useAuth(); // user와 logout 가져오기
+  const navigate = useNavigate(); // useNavigate 훅으로 페이지 이동
+
+  // 프로필 아바타를 눌렀을 때 홈으로 이동
+  const handleAvatarClick = () => {
+    navigate("/"); // "/" 경로로 이동 (HomePage)
+  };
 
   return (
     <div className={styles.nav}>
@@ -49,7 +55,12 @@ function Nav() {
             {user ? (
               <>
                 {user.name}
-                <Avatar src={user.avatar} size="small" />
+                {/* 아바타를 클릭하면 홈 페이지로 이동 */}
+                <Avatar
+                  src={user.avatar}
+                  size="small"
+                  onClick={handleAvatarClick}
+                />
                 <div className={styles.Divider} />
                 <LogButton as={Link} appearance="secondary" onClick={logout}>
                   로그아웃

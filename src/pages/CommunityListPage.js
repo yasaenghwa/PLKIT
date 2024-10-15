@@ -11,7 +11,9 @@ import styles from "./CommunityListPage.module.css";
 import searchBarStyles from "../components/SearchBar.module.css";
 import searchIcon from "../assets/search.svg";
 
-function CommunityItem({ community }) {
+function CommunityItem({ community, onDelete, onEdit }) {
+  const { user } = useAuth(); // 로그인한 사용자 정보를 가져옵니다.
+
   return (
     <Card className={styles.communityItem} key={community.title}>
       <div className={styles.info}>
@@ -27,10 +29,19 @@ function CommunityItem({ community }) {
       </div>
       <div className={styles.writer}>
         <Avatar
-          src={community.writer.profile.photo} // prop 이름을 'src'로 변경
-          alt={community.writer.name} // alt 속성 추가
-          className={styles.avatar} // 필요한 추가 클래스명 전달
+          src={community.writer.profile.photo || "default_avatar.svg"} // 기본 이미지 설정
+          alt={community.writer.name}
+          className={styles.avatar}
         />
+      </div>
+      <div className={styles.actions}>
+        {user &&
+          community.writer.name === user.name && ( // ID가 일치할 때만 버튼 표시
+            <>
+              <button onClick={() => onEdit(community)}>수정</button>
+              <button onClick={() => onDelete(community.id)}>삭제</button>
+            </>
+          )}
       </div>
     </Card>
   );
@@ -40,8 +51,10 @@ function CommunityListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initKeyword = searchParams.get("keyword");
   const [keyword, setKeyword] = useState(initKeyword || "");
+
   const [title, setTitle] = useState(""); // 새 게시글 제목 상태
   const [content, setContent] = useState(""); // 새 게시글 내용 상태
+  const [image, setImage] = useState(null); // 이미지 상태
   const [communitys, setCommunitys] = useState([]); // 초기 상태를 빈 배열로 설정
 
   const { user } = useAuth(); // 로그인한 사용자 정보를 가져옵니다.
@@ -72,10 +85,35 @@ function CommunityListPage() {
   const handleKeywordChange = (e) => setKeyword(e.target.value);
   const handleTitleChange = (e) => setTitle(e.target.value); // 제목 변경 처리
   const handleContentChange = (e) => setContent(e.target.value); // 내용 변경 처리
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(URL.createObjectURL(file)); // 이미지 URL을 설정
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setSearchParams(keyword ? { keyword } : {});
+    // 게시물 등록 로직 추가
+    console.log("제목:", title);
+    console.log("내용:", content);
+    console.log("이미지:", image);
+  };
+
+  const handleDelete = (id) => {
+    const updatedCommunitys = communitys.filter(
+      (community) => community.id !== id
+    );
+    setCommunitys(updatedCommunitys);
+    localStorage.setItem("communitys", JSON.stringify(updatedCommunitys));
+  };
+
+  const handleEdit = (community) => {
+    setTitle(community.title);
+    setContent(community.content);
+    setImage(community.image);
+    // 수정 모드 활성화를 위한 로직 추가 (추가 구현 가능)
   };
 
   // 새 게시글 폼 제출 처리
@@ -94,18 +132,27 @@ function CommunityListPage() {
       return;
     }
 
-    // 로그 추가: 중복 호출 확인
-    console.log("handlePostSubmit 호출");
-
     try {
       // addCommunity 함수 호출하여 새 게시글 추가
-      const newCommunity = await addCommunity(title, content, user);
+      const newCommunity = await addCommunity({
+        title,
+        content,
+        image,
+        writer: {
+          id: user.id, // 사용자 ID
+          name: user.name, // 사용자 이름
+          profile: {
+            photo: user.avatar || "default_avatar.svg", // user.avatar로 변경하여 전달
+          },
+        },
+      });
 
       // addCommunity 함수가 성공적으로 새로운 게시글을 반환했을 때만 상태 업데이트
       if (newCommunity) {
         setCommunitys((prevCommunitys) => [newCommunity, ...prevCommunitys]); // 새 게시글을 기존 목록에 추가
         setTitle(""); // 제목 초기화
         setContent(""); // 내용 초기화
+        setImage(null); // 이미지 초기화
       } else {
         console.warn("중복된 게시글이 발견되어 추가되지 않았습니다.");
       }
@@ -135,19 +182,38 @@ function CommunityListPage() {
 
       {/* 새 게시글 작성 폼 */}
       <form className={styles.newPostForm} onSubmit={handlePostSubmit}>
-        <input
-          name="title"
-          value={title}
-          placeholder="제목"
-          onChange={handleTitleChange}
-        />
-        <textarea
-          name="content"
-          value={content}
-          placeholder="내용"
-          onChange={handleContentChange}
-        />
-        <button type="submit">게시글 등록</button>
+        {/* 이미지 업로드 섹션 */}
+        <div className={styles.imageUpload}>
+          {image ? (
+            <img src={image} alt="미리보기" className={styles.previewImage} />
+          ) : (
+            <div className={styles.imagePlaceholder}>이미지 미리보기</div>
+          )}
+          <input type="file" accept="image/*" onChange={handleImageChange} />
+        </div>
+
+        {/* 입력 필드를 수직으로 배치 */}
+        <div className={styles.inputContainer}>
+          <input
+            type="text"
+            name="title"
+            value={title}
+            placeholder="제목을 입력해주세요."
+            onChange={handleTitleChange}
+            className={styles.inputField}
+          />
+          <textarea
+            name="content"
+            value={content}
+            placeholder="내용을 작성해주세요."
+            onChange={handleContentChange}
+            className={styles.inputField}
+          />
+        </div>
+        {/* 게시물 등록 버튼 */}
+        <button type="submit" className={styles.submitButton}>
+          확인
+        </button>
       </form>
 
       <p className={styles.count}>총 {communitys.length}개 질문</p>
@@ -161,7 +227,12 @@ function CommunityListPage() {
       ) : (
         <div className={styles.communityList}>
           {communitys.map((community) => (
-            <CommunityItem key={community.id} community={community} />
+            <CommunityItem
+              key={community.id}
+              community={community}
+              onDelete={handleDelete} // onDelete 핸들러 전달
+              onEdit={handleEdit} // onEdit 핸들러 전달
+            />
           ))}
         </div>
       )}

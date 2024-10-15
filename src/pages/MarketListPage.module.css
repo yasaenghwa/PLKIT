@@ -21,3 +21,152 @@
   font-weight: 300;
   color: #878787;
 }
+
+ {
+  /*marketItem.module.css*/
+}
+.marketItem .thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 0;
+  border-top: 10px solid black;
+}
+
+.marketItem .content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 134px;
+  padding: 20px 20px 30px;
+  background-color: #f9f9f9;
+  border-top: solid 1px #ebebeb;
+}
+
+.marketItem .title {
+  margin: 0 0 10px;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.marketItem .description {
+  display: -webkit-box;
+  margin: 0 0 10px;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 300;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+ {
+  /* src/pages/MarketListPage.js */
+}
+/* 기존 스타일 유지 */
+
+/* 새 게시물 등록 폼 스타일 */
+.newPostForm {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.inputField {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #494949;
+}
+
+.submitButton {
+  padding: 10px 20px;
+  background-color: #3baf57;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.submitButton:hover {
+  background-color: #329d4b;
+}
+
+.imageUpload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  position: relative;
+}
+
+.imageUpload input[type="file"] {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.imageUpload .previewImage {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.imageUpload .imagePlaceholder {
+  font-size: 12px;
+  color: #ccc;
+  text-align: center;
+}
+
+/* 해시태그 스타일 */
+.hashtagContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.hashtag {
+  display: flex;
+  align-items: center;
+  background-color: #e0e0e0;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.deleteTagButton {
+  background: none;
+  border: none;
+  margin-left: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #888;
+}
