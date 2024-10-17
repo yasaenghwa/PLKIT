@@ -1,3 +1,4 @@
+//고민되는 코드
 import React, { useState, useEffect } from "react";
 import Overview from "./Overview";
 import Control from "./Control";
@@ -25,34 +26,34 @@ const Dashboard = () => {
   const [tank4, setTank4] = useState(50);
   const [waterLevel, setWaterLevel] = useState(0);
 
+  const baseURL = process.env.REACT_APP_BASE_URL;
+
   // 데이터를 서버로부터 불러오는 함수
   const fetchData = async () => {
     try {
-      const tempHumResponse = await fetch(
-        "http://13.209.126.231/dummy/status/temp_hum"
-      );
+      const tempHumResponse = await fetch(`${baseURL}/dummy/status/temp_hum`);
       const tempHumData = await tempHumResponse.json();
 
       const waterLevelResponse = await fetch(
-        "http://13.209.126.231/dummy/status/water_level"
+        `${baseURL}/dummy/status/water_level`
       );
       const waterLevelData = await waterLevelResponse.json();
 
       const illuminationResponse = await fetch(
-        "http://13.209.126.231/dummy/status/illumination"
+        `${baseURL}/dummy/status/illumination`
       );
       const illuminationData = await illuminationResponse.json();
 
-      const tdsResponse = await fetch("http://13.209.126.231/dummy/status/tds");
+      const tdsResponse = await fetch(`${baseURL}/dummy/status/tds`);
       const tdsData = await tdsResponse.json();
 
       const liquidTempResponse = await fetch(
-        "http://13.209.126.231/dummy/status/liquid_temp"
+        `${baseURL}/dummy/status/liquid_temp`
       );
       const liquidTempData = await liquidTempResponse.json();
 
       const predictionResponse = await fetch(
-        "http://13.209.126.231/dummy/status/prediction"
+        `${baseURL}/dummy/status/prediction`
       );
       const predictionData = await predictionResponse.json();
 

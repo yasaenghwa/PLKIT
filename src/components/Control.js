@@ -27,11 +27,12 @@ const Control = () => {
     setTank4,
     waterLevel,
     handleWaterLevelChange,
+    handleTankChange,
   } = useSmartFarmData();
 
   return (
     <div>
-      <h1>Control</h1>
+      <h1>&nbsp;&nbsp;&nbsp;Control</h1>
       <div className={styles.controlGridLayout}>
         <div className={styles.controlLeft}>
           <div className={styles.controlCard}>
@@ -64,7 +65,10 @@ const Control = () => {
                   min={0}
                   max={100}
                   value={tank1}
-                  onChange={({ value }) => setTank1(value)}
+                  onChange={({ value }) => {
+                    console.log("Tank 1 value changed to:", value);
+                    handleTankChange(1, value); // handleTankChange 호출
+                  }}
                 />
               </div>
 
@@ -75,7 +79,10 @@ const Control = () => {
                   min={0}
                   max={100}
                   value={tank2}
-                  onChange={({ value }) => setTank2(value)}
+                  onChange={({ value }) => {
+                    console.log("Tank 2 value changed to:", value);
+                    handleTankChange(2, value); // handleTankChange 호출
+                  }}
                 />
               </div>
 
@@ -86,7 +93,10 @@ const Control = () => {
                   min={0}
                   max={100}
                   value={tank3}
-                  onChange={({ value }) => setTank3(value)}
+                  onChange={({ value }) => {
+                    console.log("Tank 3 value changed to:", value);
+                    handleTankChange(3, value); // handleTankChange 호출
+                  }}
                 />
               </div>
 
@@ -97,7 +107,10 @@ const Control = () => {
                   min={0}
                   max={100}
                   value={tank4}
-                  onChange={({ value }) => setTank4(value)}
+                  onChange={({ value }) => {
+                    console.log("Tank 4 value changed to:", value);
+                    handleTankChange(4, value); // handleTankChange 호출
+                  }}
                 />
               </div>
             </div>
@@ -110,6 +123,7 @@ const Control = () => {
               min={0}
               max={100}
               value={waterLevel}
+              maxLength={3} // 최대 3자리 숫자 입력 제한
               onChange={({ value }) => handleWaterLevelChange(value)}
             />
             <div>

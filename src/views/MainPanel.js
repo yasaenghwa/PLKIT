@@ -50,7 +50,7 @@ const MainPanel = kind({
                 Control
               </SpottableButton>
               <SpottableButton to="/Flowcheck" className={css.navButton}>
-                Flowcheck
+                Flow Check
               </SpottableButton>
               <SpottableButton to="/Community" className={css.navButton}>
                 Community

@@ -31,7 +31,7 @@ import LiquidTempTable from "./LiquidTempTable";
 import PredictionTable from "./PredictionTable";
 
 // 유틸리티 함수 임포트
-import { saveChartAsPDF, saveChartAsWord } from "../utils/exportChart";
+//import { saveChartAsPDF, saveChartAsWord } from "../utils/exportChart";
 
 const Overview = () => {
   // useState를 컴포넌트 최상위에서 호출
@@ -118,7 +118,7 @@ const Overview = () => {
 
   return (
     <div className="Overview">
-      <h1>Overview</h1>
+      <h1>&nbsp;&nbsp; Overview</h1>
       <Layout orientation="vertical" className={styles.dashboard}>
         {/* 온도 및 습도 */}
         <EnactCell>
@@ -155,7 +155,7 @@ const Overview = () => {
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-              {/* 저장 버튼 */}
+              {/* 저장 버튼 
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -171,7 +171,7 @@ const Overview = () => {
                 }}
               >
                 Save as Word
-              </button>
+              </button>*/}
               {/* 슬라이드 버튼 */}
               <button
                 onClick={(e) => {

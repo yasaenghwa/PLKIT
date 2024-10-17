@@ -1,6 +1,6 @@
 {
   "id": "com.plkit.app",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "vendor": "PLKIT",
   "type": "web",
   "main": "index.html",
