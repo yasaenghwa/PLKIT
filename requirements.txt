@@ -3,3 +3,4 @@ requests
 pylint
 ruff
 instructor
+sort-requirements
