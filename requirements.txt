@@ -11,3 +11,10 @@ darts
 autots
 black
 isort
+pymongo
+fastapi
+uvicorn
+pandas
+numpy
+joblib
+sort-requirements
