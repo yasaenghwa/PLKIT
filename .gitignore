@@ -1,3 +1,4 @@
 *.conf
+*.log
 
 __pycache__/
