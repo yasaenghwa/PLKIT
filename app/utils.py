@@ -1,47 +1,64 @@
 # app/utils.py
 
-import numpy as np
 import pandas as pd
-import torch
+import logging
 from sklearn.preprocessing import StandardScaler
+from darts import TimeSeries
 
-
-def preprocess_input(data: dict, scaler_X: StandardScaler, seq_length: int, num_features: int) -> torch.Tensor:
+def preprocess_data(df: pd.DataFrame) -> tuple:
     """
-    클라이언트로부터 받은 JSON 데이터를 전처리하여 모델 입력 형식으로 변환
-    :param data: 클라이언트로부터 받은 데이터 (딕셔너리)
-    :param scaler_X: 학습 시 사용한 StandardScaler 객체
-    :param seq_length: 시퀀스 길이
-    :param num_features: 특성 수
-    :return: 전처리된 데이터 텐서
+    데이터 전처리 함수
+    - 결측값 처리
+    - 중복 인덱스 제거
+    - 스케일링
+    - Darts TimeSeries 객체로 변환
     """
-    # 데이터프레임으로 변환
-    df = pd.DataFrame([data])
+    try:
+        # 타임스탬프 인덱스가 고유한지 확인
+        if not df.index.is_unique:
+            logging.warning("인덱스에 중복된 타임스탬프가 있습니다. 중복을 제거합니다.")
+            df = df[~df.index.duplicated(keep='first')]
 
-    # 필요한 전처리 수행 (예: 스케일링)
-    X_scaled = scaler_X.transform(df)
+        # 결측값 처리 (전방 채우기)
+        df.fillna(method='ffill', inplace=True)
 
-    # 시퀀스 생성 (단일 시퀀스로 가정)
-    # 실제 사용 시 여러 시퀀스를 처리할 수 있도록 수정 필요
-    if X_scaled.shape[0] < seq_length:
-        # 시퀀스 길이에 맞게 패딩 또는 다른 처리 필요
-        raise ValueError("데이터 시퀀스가 충분하지 않습니다.")
+        # 리샘플링하여 10분 간격으로 맞추기 (필요 시)
+        df = df.resample('10T').ffill()
 
-    # 시퀀스 길이에 맞게 슬라이딩 윈도우 적용
-    X_seq = X_scaled[-seq_length:]
+        # 스케일링
+        scaler = StandardScaler()
+        scaled_data = scaler.fit_transform(df)
+        scaled_df = pd.DataFrame(scaled_data, index=df.index, columns=df.columns)
 
-    # 텐서로 변환
-    X_tensor = torch.tensor(X_seq, dtype=torch.float32).unsqueeze(0)  # (1, seq_length, num_features)
+        # Darts TimeSeries 객체로 변환
+        series_dict = {}
+        for column in scaled_df.columns:
+            series_dict[column] = TimeSeries.from_dataframe(
+                scaled_df,
+                value_cols=column,
+                fill_missing_dates=True,
+                freq='10T'  # 10분 간격으로 설정
+            )
 
-    return X_tensor
+        logging.info("데이터 전처리 및 TimeSeries 객체 변환 완료.")
+        return series_dict, scaler
 
-def postprocess_output(prediction: float, scaler_y: StandardScaler) -> float:
+    except Exception as e:
+        logging.error(f"데이터 전처리 중 오류 발생: {e}")
+        raise
+
+def calculate_time_until_threshold(series: TimeSeries, threshold: float) -> int:
     """
-    모델의 예측 결과를 후처리하여 원래 스케일로 되돌림
-    :param prediction: 모델의 예측값
-    :param scaler_y: 학습 시 사용한 y 스케일러
-    :return: 후처리된 예측값
+    시계열 데이터에서 임계치 이하로 떨어지는 시점까지의 시간을 예측
+    - series: Darts TimeSeries 객체
+    - threshold: 임계치 (%)
+    - 반환값: 임계치 도달까지의 시간 (예: 10분 단위)
     """
-    prediction = np.array(prediction).reshape(-1, 1)
-    prediction_original = scaler_y.inverse_transform(prediction).flatten()[0]
-    return prediction_original
+    try:
+        for i, value in enumerate(series.values()):
+            if value <= threshold:
+                return i * 10  # i는 10분 단위이므로 총 분 단위로 변환
+        return -1  # 임계치에 도달하지 않는 경우
+    except Exception as e:
+        logging.error(f"임계치 도달 시간 계산 중 오류 발생: {e}")
+        raise

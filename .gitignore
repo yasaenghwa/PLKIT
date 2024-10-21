@@ -1,3 +1,8 @@
 set_connection.py
 __pycache__/
 config.conf
+.env
+*.csv
+*.log
+*.pt.ckpt
+*.pt

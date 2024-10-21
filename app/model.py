@@ -1,66 +1,93 @@
-import torch
-import torch.nn as nn
+# app/model.py
 
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
+from xgboost import XGBRegressor
+from darts.models import TSMixerModel as TSMixer
+from darts import TimeSeries
+import joblib
 
-class LSTMModel(nn.Module):
-    def __init__(self, input_size, hidden_size=64, num_layers=2):
-        super(LSTMModel, self).__init__()
-        self.hidden_size = hidden_size
-        self.num_layers = num_layers
-        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
-        self.fc = nn.Linear(hidden_size, 1)
-    def forward(self, x):
-        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
-        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
+class BaseModel:
+    def train(self, X, y):
+        raise NotImplementedError
 
-        out, _ = self.lstm(x, (h0, c0))
+    def predict(self, X):
+        raise NotImplementedError
 
-        out = out[:, -1, :]
-        out = self.fc(out)
-        return out.squeeze()
+    def save(self, filepath):
+        raise NotImplementedError
 
+    def load(self, filepath):
+        raise NotImplementedError
 
-class TSMixerBlock(nn.Module):
-    def __init__(self, token_dim, channel_dim, seq_length):
-        super(TSMixerBlock, self).__init__()
-        self.token_mixing = nn.Sequential(
-            nn.LayerNorm(channel_dim),
-            nn.Linear(seq_length, token_dim),
-            nn.GELU(),
-            nn.Linear(token_dim, seq_length)
+class RandomForestModel(BaseModel):
+    def __init__(self, n_estimators=100, random_state=42):
+        self.model = RandomForestRegressor(n_estimators=n_estimators, random_state=random_state)
+
+    def train(self, X, y):
+        self.model.fit(X, y)
+
+    def predict(self, X):
+        return self.model.predict(X)
+
+    def save(self, filepath):
+        joblib.dump(self.model, filepath)
+
+    def load(self, filepath):
+        self.model = joblib.load(filepath)
+
+class LinearRegressionModel(BaseModel):
+    def __init__(self):
+        self.model = LinearRegression()
+
+    def train(self, X, y):
+        self.model.fit(X, y)
+
+    def predict(self, X):
+        return self.model.predict(X)
+
+    def save(self, filepath):
+        joblib.dump(self.model, filepath)
+
+    def load(self, filepath):
+        self.model = joblib.load(filepath)
+
+class XGBoostModel(BaseModel):
+    def __init__(self, n_estimators=100, random_state=42):
+        self.model = XGBRegressor(n_estimators=n_estimators, random_state=random_state)
+
+    def train(self, X, y):
+        self.model.fit(X, y)
+
+    def predict(self, X):
+        return self.model.predict(X)
+
+    def save(self, filepath):
+        joblib.dump(self.model, filepath)
+
+    def load(self, filepath):
+        self.model = joblib.load(filepath)
+
+# TSMixer 정의 (Darts의 TSMixer 사용)
+class TSMixerModel(BaseModel):
+    def __init__(self, input_chunk_length=24, output_chunk_length=12, n_epochs=300, model_kwargs=None):
+        if model_kwargs is None:
+            model_kwargs = {}
+        self.model = TSMixer(
+            input_chunk_length=input_chunk_length,
+            output_chunk_length=output_chunk_length,
+            n_epochs=n_epochs,
+            **model_kwargs
         )
-        self.channel_mixing = nn.Sequential(
-            nn.LayerNorm(channel_dim),
-            nn.Linear(channel_dim, channel_dim),
-            nn.GELU(),
-            nn.Linear(channel_dim, channel_dim)
-        )
 
-    def forward(self, x):
-        # x shape: (batch_size, seq_length, channel_dim)
-        residual = x
-        x = self.token_mixing(x.transpose(1, 2)).transpose(1, 2)
-        x = x + residual
+    def train(self, series: TimeSeries):
+        self.model.fit(series)
 
-        residual = x
-        x = self.channel_mixing(x)
-        x = x + residual
-        return x
+    def predict(self, series: TimeSeries, n: int) -> TimeSeries:
+        return self.model.predict(n)
 
+    def save(self, filepath):
+        self.model.save(filepath)
 
-class TSMixer(nn.Module):
-    def __init__(self, num_features, mixer_blocks=2, token_dim=256, channel_dim=256, seq_length=24):
-        super(TSMixer, self).__init__()
-        self.initial_projection = nn.Linear(num_features, channel_dim)
-        self.mixer_blocks = nn.Sequential(
-            *[TSMixerBlock(token_dim, channel_dim, seq_length) for _ in range(mixer_blocks)]
-        )
-        self.output_layer = nn.Linear(channel_dim, 1)
-
-    def forward(self, x):
-        # x shape: (batch_size, seq_length, num_features)
-        x = self.initial_projection(x)  # (batch_size, seq_length, channel_dim)
-        x = self.mixer_blocks(x)
-        x = x.mean(dim=1)
-        x = self.output_layer(x)
-        return x.squeeze()
+    def load(self, filepath):
+        self.model = TSMixer.load(filepath)

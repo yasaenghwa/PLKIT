@@ -1,20 +1,18 @@
-pandas < 2.0
-numpy
-scikit-learn
-matplotlib
-pylint
-ruff
-torch
-torchvision
-xgboost
-darts
 autots
 black
-isort
-pymongo
+darts
 fastapi
-uvicorn
-pandas
-numpy
+isort
 joblib
+matplotlib
+numpy < 2.0
+pandas < 2.0
+pylint
+pymongo
+ruff
+scikit-learn
 sort-requirements
+torch
+torchvision
+uvicorn
+xgboost
