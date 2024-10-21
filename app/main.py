@@ -1,78 +1,41 @@
+# app/main.py
+
 import os
-from typing import Optional
+import sys
 
-import joblib
-import torch
-from fastapi import FastAPI, HTTPException, Query
-from pydantic import BaseModel
+# 현재 파일의 디렉토리 (app/)를 기준으로 상위 디렉토리 (your_project/)를 추가
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(current_dir)
+sys.path.append(project_root)
 
-from .model_manager import ModelManager
-from .utils import postprocess_output, preprocess_input
+import logging
 
-app = FastAPI(title="Multi-Model TSMixer Growth Period Prediction API")
+import uvicorn
+from app.train_model import setup_logging, train_model
 
-MODEL_DIR = os.getenv("MODEL_DIR", "models")
-SCALER_X_PATH = os.getenv("SCALER_X_PATH", "scalers/scaler_X.joblib")
-SCALER_Y_PATH = os.getenv("SCALER_Y_PATH", "scalers/scaler_y.joblib")
-SEQ_LENGTH = int(os.getenv("SEQ_LENGTH", "24"))
-NUM_FEATURES = int(os.getenv("NUM_FEATURES", "10"))
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+def main():
+    setup_logging()
+    logging.info("프로그램 시작")
 
-model_manager = ModelManager(model_dir=MODEL_DIR, device=device)
-
-try:
-    scaler_X = joblib.load(SCALER_X_PATH)
-    scaler_y = joblib.load(SCALER_Y_PATH)
-except Exception as e:
-    raise RuntimeError(f"Failed to load scalers: {e}")
-
-class InputData(BaseModel):
-    feature1: float
-    feature2: float
-    feature3: float
-    feature4: float
-    feature5: float
-    feature6: float
-    feature7: float
-    feature8: float
-    feature9: float
-    feature10: float
-
-class PredictionResponse(BaseModel):
-    predicted_growth_period: float
-
-@app.post("/predict", response_model=PredictionResponse)
-def predict(data: InputData, model_name: Optional[str] = Query(None, description="사용할 모델 이름")):
     try:
-        if model_name is None:
-            model_name = list(model_manager.models.keys())[0]
+        # CSV 업로드
+        from data.get_from_mongodb import get_data_from_db
 
-        input_dict = data.dict()
+        # 데이터 가져오기
+        df = get_data_from_db()
+        logging.info(f"데이터프레임 내용:\n{df.head()}")
 
-        X_tensor = preprocess_input(
-            data=input_dict,
-            scaler_X=scaler_X,
-            seq_length=SEQ_LENGTH,
-            num_features=NUM_FEATURES
-        ).to(device)
+        # 모델 학습 (필요 시)
+        train_model("RandomForest")  # FastAPI API를 통해 학습할 수도 있습니다.
 
-        model = model_manager.get_model(model_name)
-
-        with torch.no_grad():
-            prediction = model(X_tensor).cpu().numpy()[0]
-
-        prediction_original = postprocess_output(prediction, scaler_y)
-
-        return PredictionResponse(predicted_growth_period=prediction_original)
+        # FastAPI 서버 실행
+        uvicorn.run("app.api:app", host="0.0.0.0", port=8000, reload=True)
 
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logging.error(f"메인 함수 중 오류 발생: {e}")
+    finally:
+        logging.info("프로그램 종료")
 
-@app.get("/models", response_model=list)
-def list_models():
-    return list(model_manager.models.keys())
-
-@app.get("/")
-def read_root():
-    return {"message": "Multi-Model TSMixer Growth Period Prediction API"}
+if __name__ == "__main__":
+    main()

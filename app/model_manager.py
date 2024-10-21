@@ -1,80 +1,79 @@
+# app/model_manager.py
+
+import logging
 import os
 from typing import Dict
 
-import torch
-import torch.nn as nn
-
-from .model import LSTMModel, TSMixer
+from app.model import (
+    BaseModel,
+    LinearRegressionModel,
+    LSTMModel,
+    RandomForestModel,
+    TSMixerModel,
+    XGBoostModel,
+)
 
 
 class ModelManager:
-    def __init__(self, model_dir: str, device: torch.device):
-        self.model_dir = model_dir
-        self.device = device
-        self.models: Dict[str, nn.Module] = {}
+    def __init__(self, models_dir: str = "models"):
+        self.models_dir = models_dir
+        os.makedirs(self.models_dir, exist_ok=True)
+        self.available_models: Dict[str, BaseModel] = {}
         self.load_all_models()
 
-    def load_model(self, model_name: str, model_type: str, config: Dict):
-        model_path = os.path.join(self.model_dir, f"{model_name}.pth")
-        if not os.path.exists(model_path):
-            raise FileNotFoundError(f"Model file {model_path} does not exist.")
-
-        if model_type == "LSTM":
-            model = LSTMModel(
-                input_size=config['input_size'],
-                hidden_size=config.get('hidden_size', 64),
-                num_layers=config.get('num_layers', 2)
-            )
-        elif model_type == "TSMixer":
-            model = TSMixer(
-                num_features=config['num_features'],
-                mixer_blocks=config.get('mixer_blocks', 2),
-                token_dim=config.get('token_dim', 256),
-                channel_dim=config.get('channel_dim', 256),
-                seq_length=config.get('seq_length', 24)
-            )
-        else:
-            raise ValueError(f"Unsupported model type: {model_type}")
-
-        model.load_state_dict(torch.load(model_path, map_location=self.device))
-        model.to(self.device)
-        model.eval()
-        self.models[model_name] = model
-        print(f"Loaded {model_type} model: {model_name}")
-
     def load_all_models(self):
-        for file in os.listdir(self.model_dir):
-            if file.endswith(".pth"):
-                parts = file[:-4].split("_")
-                if len(parts) < 2:
-                    print(f"Skipping unrecognized model file: {file}")
-                    continue
-                model_name = "_".join(parts[:-1])
-                model_type = parts[-1]
-                if model_type == "LSTM":
-                    config = {
-                        'input_size': 10,
-                        'hidden_size': 64,
-                        'num_layers': 2
-                    }
-                elif model_type == "TSMixer":
-                    config = {
-                        'num_features': 10,
-                        'mixer_blocks': 2,
-                        'token_dim': 256,
-                        'channel_dim': 256,
-                        'seq_length': 24
-                    }
-                else:
-                    print(f"Unsupported model type in file: {file}")
-                    continue
+        for filename in os.listdir(self.models_dir):
+            if filename.endswith(".joblib") or filename.endswith(".pth"):
+                model_name, ext = os.path.splitext(filename)
+                model = self.create_model_instance(model_name, ext)
+                if model:
+                    model.load(os.path.join(self.models_dir, filename))
+                    self.available_models[model_name] = model
+                    logging.info(f"{model_name} 모델을 로드했습니다.")
 
-                try:
-                    self.load_model(model_name, model_type, config)
-                except Exception as e:
-                    print(f"Failed to load model {model_name}: {e}")
+    def create_model_instance(self, model_name: str, ext: str = ".joblib") -> BaseModel:
+        if model_name == "RandomForest":
+            return RandomForestModel()
+        elif model_name == "LinearRegression":
+            return LinearRegressionModel()
+        elif model_name == "XGBoost":
+            return XGBoostModel()
+        elif model_name == "LSTM":
+            # LSTM 모델 초기화 시 필요한 매개변수를 지정
+            input_size = 10  # 예시 값, 실제 데이터에 맞게 조정
+            hidden_size = 50
+            num_layers = 2
+            output_size = 1
+            return LSTMModel(input_size, hidden_size, num_layers, output_size)
+        elif model_name == "TSMixer":
+            return TSMixerModel()
+        else:
+            logging.warning(f"알 수 없는 모델 이름: {model_name}")
+            return None
 
-    def get_model(self, model_name: str) -> nn.Module:
-        if model_name not in self.models:
-            raise ValueError(f"Model {model_name} is not loaded.")
-        return self.models[model_name]
+    def train_model(self, model_name: str, X, y):
+        model = self.available_models.get(model_name)
+        if not model:
+            model = self.create_model_instance(model_name)
+            if not model:
+                raise ValueError(f"모델 이름이 올바르지 않습니다: {model_name}")
+            self.available_models[model_name] = model
+
+        model.train(X, y)
+        # 모델 유형에 따라 저장 방식 다름
+        if isinstance(model, LSTMModel):
+            model_filepath = os.path.join(self.models_dir, f"{model_name}.pth")
+        else:
+            model_filepath = os.path.join(self.models_dir, f"{model_name}.joblib")
+
+        model.save(model_filepath)
+        logging.info(f"{model_name} 모델을 학습하고 저장했습니다.")
+
+    def predict(self, model_name: str, X):
+        model = self.available_models.get(model_name)
+        if not model:
+            raise ValueError(f"모델이 로드되지 않았습니다: {model_name}")
+        return model.predict(X)
+
+    def list_models(self):
+        return list(self.available_models.keys())

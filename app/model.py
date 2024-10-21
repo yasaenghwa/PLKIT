@@ -1,66 +1,119 @@
+# app/model.py
+
+import joblib
 import torch
 import torch.nn as nn
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
+from torchtsmixer import TSMixer
+from xgboost import XGBRegressor
 
 
-class LSTMModel(nn.Module):
-    def __init__(self, input_size, hidden_size=64, num_layers=2):
+class BaseModel:
+    def train(self, X, y):
+        raise NotImplementedError
+
+    def predict(self, X):
+        raise NotImplementedError
+
+    def save(self, filepath):
+        joblib.dump(self.model, filepath)
+
+    def load(self, filepath):
+        self.model = joblib.load(filepath)
+
+class RandomForestModel(BaseModel):
+    def __init__(self, n_estimators=100, random_state=42):
+        self.model = RandomForestRegressor(n_estimators=n_estimators, random_state=random_state)
+
+    def train(self, X, y):
+        self.model.fit(X, y)
+
+    def predict(self, X):
+        return self.model.predict(X)
+
+class LinearRegressionModel(BaseModel):
+    def __init__(self):
+        self.model = LinearRegression()
+
+    def train(self, X, y):
+        self.model.fit(X, y)
+
+    def predict(self, X):
+        return self.model.predict(X)
+
+class XGBoostModel(BaseModel):
+    def __init__(self, n_estimators=100, random_state=42):
+        self.model = XGBRegressor(n_estimators=n_estimators, random_state=random_state)
+
+    def train(self, X, y):
+        self.model.fit(X, y)
+
+    def predict(self, X):
+        return self.model.predict(X)
+
+# LSTM 모델 정의
+class LSTMModel(BaseModel):
+    def __init__(self, input_size, hidden_size, num_layers, output_size):
         super(LSTMModel, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
-        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
-        self.fc = nn.Linear(hidden_size, 1)
-    def forward(self, x):
-        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
-        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
+        self.model = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
+        self.fc = nn.Linear(hidden_size, output_size)
 
-        out, _ = self.lstm(x, (h0, c0))
+    def train_model(self, X, y, epochs=100, learning_rate=0.001):
+        criterion = nn.MSELoss()
+        optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate)
 
-        out = out[:, -1, :]
-        out = self.fc(out)
-        return out.squeeze()
+        for epoch in range(epochs):
+            self.model.train()
+            inputs = torch.tensor(X, dtype=torch.float32)
+            targets = torch.tensor(y.values, dtype=torch.float32).unsqueeze(1)
 
+            outputs, _ = self.model(inputs)
+            outputs = self.fc(outputs[:, -1, :])
 
-class TSMixerBlock(nn.Module):
-    def __init__(self, token_dim, channel_dim, seq_length):
-        super(TSMixerBlock, self).__init__()
-        self.token_mixing = nn.Sequential(
-            nn.LayerNorm(channel_dim),
-            nn.Linear(seq_length, token_dim),
-            nn.GELU(),
-            nn.Linear(token_dim, seq_length)
-        )
-        self.channel_mixing = nn.Sequential(
-            nn.LayerNorm(channel_dim),
-            nn.Linear(channel_dim, channel_dim),
-            nn.GELU(),
-            nn.Linear(channel_dim, channel_dim)
-        )
+            loss = criterion(outputs, targets)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
-    def forward(self, x):
-        # x shape: (batch_size, seq_length, channel_dim)
-        residual = x
-        x = self.token_mixing(x.transpose(1, 2)).transpose(1, 2)
-        x = x + residual
+            if (epoch+1) % 10 == 0:
+                print(f'Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.4f}')
 
-        residual = x
-        x = self.channel_mixing(x)
-        x = x + residual
-        return x
+    def train(self, X, y):
+        self.train_model(X, y)
 
+    def predict(self, X):
+        self.model.eval()
+        with torch.no_grad():
+            inputs = torch.tensor(X, dtype=torch.float32)
+            outputs, _ = self.model(inputs)
+            outputs = self.fc(outputs[:, -1, :])
+            return outputs.numpy().flatten()
 
-class TSMixer(nn.Module):
-    def __init__(self, num_features, mixer_blocks=2, token_dim=256, channel_dim=256, seq_length=24):
-        super(TSMixer, self).__init__()
-        self.initial_projection = nn.Linear(num_features, channel_dim)
-        self.mixer_blocks = nn.Sequential(
-            *[TSMixerBlock(token_dim, channel_dim, seq_length) for _ in range(mixer_blocks)]
-        )
-        self.output_layer = nn.Linear(channel_dim, 1)
+    def save(self, filepath):
+        torch.save(self.model.state_dict(), filepath)
 
-    def forward(self, x):
-        # x shape: (batch_size, seq_length, num_features)
-        x = self.initial_projection(x)  # (batch_size, seq_length, channel_dim)
-        x = self.mixer_blocks(x)
-        x = x.mean(dim=1)
-        x = self.output_layer(x)
-        return x.squeeze()
+    def load(self, filepath):
+        # LSTM 모델을 로드하려면, 모델 아키텍처를 먼저 정의해야 합니다.
+        # 여기서는 간단히 파일을 로드하는 예시를 제공합니다.
+        # 실제 사용 시, 모델 아키텍처를 일치시켜야 합니다.
+        raise NotImplementedError("LSTM 모델 로드는 수동으로 아키텍처를 맞춰야 합니다.")
+
+# tsmixer 모델 정의
+class TSMixerModel(BaseModel):
+    def __init__(self, config=None):
+        self.model = TSMixer(config=config)  # tsmixer의 TimeSeriesModel 사용
+
+    def train(self, X, y):
+        self.model.fit(X, y)
+
+    def predict(self, X):
+        return self.model.predict(X)
+
+    def save(self, filepath):
+        joblib.dump(self.model, filepath)
+
+    def load(self, filepath):
+        self.model = joblib.load(filepath)
