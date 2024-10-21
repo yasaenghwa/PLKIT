@@ -1,11 +1,10 @@
-# mongo_utils.py
+# data/mongo_utils.py
 
-import logging
 import os
-
-from dotenv import load_dotenv
+import logging
 from pymongo import MongoClient
 from pymongo.errors import ConfigurationError, ConnectionFailure
+from dotenv import load_dotenv
 
 # .env 파일 로드
 load_dotenv()
@@ -17,7 +16,6 @@ def get_mongo_client():
     MONGO_PORT = int(os.getenv("MONGO_PORT", "27017"))
     MONGO_DB = os.getenv("MONGO_DB")
 
-    # 연결 문자열 구성
     uri = f"mongodb://{MONGO_USER}:{MONGO_PASSWORD}@{MONGO_HOST}:{MONGO_PORT}/{MONGO_DB}?authSource=admin"
 
     try:

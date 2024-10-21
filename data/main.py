@@ -20,12 +20,8 @@ def main():
     logging.info("프로그램 시작")
 
     try:
-        # CSV 업로드
-        upload_csv_to_mongodb("./data/Synthetic_data.csv")
-
         # 데이터 가져오기
         df = get_data_from_db()
-        print(df.head())
 
     except Exception as e:
         logging.error(f"메인 함수 중 오류 발생: {e}")

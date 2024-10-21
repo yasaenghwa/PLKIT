@@ -2,12 +2,12 @@
 
 import logging
 import os
-
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 import pandas as pd
 from app.model_manager import ModelManager
 from app.utils import preprocess_data
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from darts import TimeSeries
 
 app = FastAPI()
 manager = ModelManager()
@@ -45,11 +45,24 @@ def predict(model_name: str, data: InputData):
         input_df = pd.DataFrame([data.dict()])
 
         # 데이터 전처리
-        X, _ = preprocess_data(input_df)
+        series_dict, scaler = preprocess_data(input_df)
 
         # 예측 수행
-        prediction = manager.predict(model_name, X)
-        return {"predicted_air_temperature_C": prediction[0]}
+        predictions = {}
+        for target, series in series_dict.items():
+            # 각 타겟에 대해 개별 모델 이름 생성
+            if target in ["Water Level Tank (%)", "Nutrient Tank Level (%)", "Recycle Tank Level (%)"]:
+                specific_model_name = f"TSMixer_{target}"
+                if specific_model_name not in manager.list_models():
+                    raise ValueError(f"모델이 존재하지 않습니다: {specific_model_name}")
+                prediction_series = manager.predict(specific_model_name, series, n=1)
+                predictions[target] = prediction_series.values()[0][0]
+            else:
+                # 기타 모델 예측 (필요 시 추가)
+                pass
+
+        return {"predictions": predictions}
+
     except ValueError as ve:
         logging.error(f"예측 중 오류 발생: {ve}")
         raise HTTPException(status_code=400, detail=str(ve))

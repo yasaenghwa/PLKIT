@@ -4,3 +4,5 @@ config.conf
 .env
 *.csv
 *.log
+*.pt.ckpt
+*.pt
