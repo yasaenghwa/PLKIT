@@ -4,3 +4,6 @@ pylint
 ruff
 instructor
 sort-requirements
+fastapi
+uvicorn
+pydantic
