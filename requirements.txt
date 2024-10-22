@@ -9,6 +9,7 @@ numpy < 2.0
 pandas < 2.0
 pylint
 pymongo
+python-multipart
 ruff
 scikit-learn
 sort-requirements

@@ -57,8 +57,8 @@ def calculate_time_until_threshold(series: TimeSeries, threshold: float) -> int:
     try:
         for i, value in enumerate(series.values()):
             if value <= threshold:
-                return i * 10  # i는 10분 단위이므로 총 분 단위로 변환
-        return -1  # 임계치에 도달하지 않는 경우
+                return i * 10
+        return -1
     except Exception as e:
         logging.error(f"임계치 도달 시간 계산 중 오류 발생: {e}")
         raise
