@@ -152,7 +152,9 @@ const Control = () => {
                 4단계 (100)
               </Button>
             </div>
-            <p>Current Water Level: {waterLevel}%</p>
+            <p className={styles.waterLevelText}>
+              Current Water Level: {waterLevel}%
+            </p>
           </div>
         </div>
       </div>

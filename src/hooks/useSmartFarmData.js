@@ -85,34 +85,42 @@ const useSmartFarmData = () => {
     const handleMqttMessage = (topic, message) => {
       const msg = message.toString();
       // MQTT 메시지 처리 로직
-      if (topic === "smartFarm/overview") {
-        const receivedData = JSON.parse(msg);
-        setData(receivedData);
-      } else if (topic === "PLKIT/control/fan") {
-        setFan(msg === "1");
-      } else if (topic === "PLKIT/control/heater") {
-        setHeater(msg === "1");
-      } else if (topic === "PLKIT/control/Light") {
-        setLedLight(msg === "1");
-      } else if (topic === "PLKIT/control/nutreinet_solution_pump") {
-        setTank1(Number(msg)); // 01: nutrient solution
-      } else if (topic === "PLKIT/control/Plus_water_pump") {
-        setTank2(Number(msg)); // 02: water plus (water)
-      } else if (topic === "PLKIT/control/Recycle_fluid_tank") {
-        setTank3(Number(msg)); // 03: recycle fluid
-      } else if (topic === "smartFarm/control/tank4") {
-        setTank4(Number(msg)); // 04: farm
-      } else if (topic === "PLKIT/control/Recycle_fluid") {
-        setWaterLevel(Number(msg));
+
+      try {
+        // MQTT 메시지 처리 로직
+        const parsedMsg = JSON.parse(msg); // 메시지를 JSON 형식으로 파싱
+
+        if (topic === "PLKIT/overview") {
+          const receivedData = JSON.parse(msg);
+          setData(receivedData);
+        } else if (topic === "PLKIT/control/fan") {
+          setFan(parsedMsg.command === "on");
+        } else if (topic === "PLKIT/control/heater") {
+          setHeater(parsedMsg.command === "on");
+        } else if (topic === "PLKIT/control/Light") {
+          setLedLight(parsedMsg.command === "on");
+        } else if (topic === "PLKIT/control/nutreinet_solution_pump_FE") {
+          setTank1(Number(msg)); // 01: nutrient solution
+        } else if (topic === "PLKIT/control/Plus_water_pump_FE") {
+          setTank2(Number(msg)); // 02: water plus (water)
+        } else if (topic === "PLKIT/control/farm_pump_FE") {
+          setTank3(Number(msg)); // 03: farm
+        } else if (topic === "PLKIT/control/recycle_pump_FE") {
+          setTank4(Number(msg)); // 04: recycle fluid
+        } else if (topic === "PLKIT/control/Water_level_FE") {
+          setWaterLevel(Number(msg));
+        }
+      } catch (error) {
+        console.error("Failed to parse MQTT message:", error);
       }
     };
 
     // MQTT 연결 설정
     mqttClient.current.on("connect", () => {
       console.log("MQTT Broker에 연결됨");
-      mqttClient.current.subscribe("smartFarm/overview", (err) => {
+      mqttClient.current.subscribe("PLKIT/overview", (err) => {
         if (!err) {
-          console.log("smartFarm/overview 구독됨");
+          console.log("PLKIT/overview 구독됨");
         }
       });
 
@@ -135,48 +143,51 @@ const useSmartFarmData = () => {
       });
       // 탱크 및 수위 관련 MQTT 주제 구독
       mqttClient.current.subscribe(
-        "PLKIT/control/nutreinet_solution_pump",
+        "PLKIT/control/nutreinet_solution_pump_FE",
         (err) => {
           if (!err) {
-            console.log("PLKIT/control/nutreinet_solution_pump 구독됨");
+            console.log("PLKIT/control/nutreinet_solution_pump_FE 구독됨");
           } else {
             console.error(
-              "PLKIT/control/nutreinet_solution_pump 구독 실패:",
+              "PLKIT/control/nutreinet_solution_pump_FE 구독 실패:",
               err
             );
           }
         }
       );
 
-      mqttClient.current.subscribe("PLKIT/control/Plus_water_pump", (err) => {
+      mqttClient.current.subscribe(
+        "PLKIT/control/Plus_water_pump_FE",
+        (err) => {
+          if (!err) {
+            console.log("PLKIT/control/Plus_water_pump_FE 구독됨");
+          } else {
+            console.error("PLKIT/control/Plus_water_pump_FE 구독 실패:", err);
+          }
+        }
+      );
+
+      mqttClient.current.subscribe("PLKIT/control/farm_pump_FE", (err) => {
         if (!err) {
-          console.log("PLKIT/control/Plus_water_pump 구독됨");
+          console.log("PLKIT/control/farm_pump_FE 구독됨");
         } else {
-          console.error("PLKIT/control/Plus_water_pump 구독 실패:", err);
+          console.error("PLKIT/control/farm_pump_FE 구독 실패:", err);
         }
       });
 
-      mqttClient.current.subscribe("smartFarm/control/tank3", (err) => {
+      mqttClient.current.subscribe("PLKIT/control/recycle_pump_FE", (err) => {
         if (!err) {
-          console.log("smartFarm/control/tank3 구독됨");
+          console.log("PLKIT/control/recycle_pump_FE 구독됨");
         } else {
-          console.error("smartFarm/control/tank3 구독 실패:", err);
+          console.error("PLKIT/control/recycle_pump_FE 구독 실패:", err);
         }
       });
 
-      mqttClient.current.subscribe("smartFarm/control/tank4", (err) => {
+      mqttClient.current.subscribe("PLKIT/control/Water_level_FE", (err) => {
         if (!err) {
-          console.log("smartFarm/control/tank4 구독됨");
+          console.log("PLKIT/control/Water_level_FE 구독됨");
         } else {
-          console.error("smartFarm/control/tank4 구독 실패:", err);
-        }
-      });
-
-      mqttClient.current.subscribe("PLKIT/control/Recycle_fluid", (err) => {
-        if (!err) {
-          console.log("PLKIT/control/Recycle_fluid 구독됨");
-        } else {
-          console.error("PLKIT/control/Recycle_fluid 구독 실패:", err);
+          console.error("PLKIT/control/Water_level_FE 구독 실패:", err);
         }
       });
     });
@@ -203,46 +214,60 @@ const useSmartFarmData = () => {
     const newState = !fan;
     setFan(newState);
     console.log("Fan state:", newState); // 팬 상태 로그
-    mqttClient.current.publish("PLKIT/control/fan", newState ? "1" : "0");
+    const command = newState ? { command: "on" } : { command: "off" };
+    mqttClient.current.publish("PLKIT/control/fan", JSON.stringify(command));
   };
 
   const toggleHeater = () => {
     const newState = !heater;
     setHeater(newState);
     console.log("Heater:", newState); // 팬 상태 로그
-    mqttClient.current.publish("PLKIT/control/heater", newState ? "1" : "0");
+
+    const command = newState ? { command: "on" } : { command: "off" };
+    mqttClient.current.publish("PLKIT/control/heater", JSON.stringify(command));
   };
 
   const toggleLedLight = () => {
     const newState = !ledLight;
     setLedLight(newState);
     console.log("Led Light:", newState); // 팬 상태 로그
-    mqttClient.current.publish("PLKIT/control/Light", newState ? "1" : "0");
+
+    const command = newState ? { command: "on" } : { command: "off" };
+    mqttClient.current.publish("PLKIT/control/Light", JSON.stringify(command));
   };
 
   const handleTankChange = (tankNumber, value) => {
     if (tankNumber === 1) {
       setTank1(value);
       console.log("Tank 1 level:", value); // tank1 상태 로그
+
       mqttClient.current.publish(
-        "PLKIT/control/nutreinet_solution_pump",
+        "PLKIT/control/nutreinet_solution_pump_FE",
         value.toString()
       );
     } else if (tankNumber === 2) {
       setTank2(value);
       console.log("Tank 2 level:", value); // tank2 상태 로그
+
       mqttClient.current.publish(
-        "PLKIT/control/Plus_water_pump",
+        "PLKIT/control/Plus_water_pump_FE",
         value.toString()
       );
     } else if (tankNumber === 3) {
       setTank3(value);
       console.log("Tank 3 level:", value); // tank3 상태 로그
-      mqttClient.current.publish("smartFarm/control/tank3", value.toString());
+
+      mqttClient.current.publish(
+        "PLKIT/control/farm_pump_FE",
+        value.toString()
+      );
     } else if (tankNumber === 4) {
       setTank4(value);
       console.log("Tank 4 level:", value); // tank4 상태 로그
-      mqttClient.current.publish("smartFarm/control/tank4", value.toString());
+      mqttClient.current.publish(
+        "PLKIT/control/recycle_pump_FE",
+        value.toString()
+      );
     }
   };
 
@@ -255,7 +280,10 @@ const useSmartFarmData = () => {
     }
     setWaterLevel(level);
     console.log("Water Level:", level); // water level 상태 로그
-    mqttClient.current.publish("PLKIT/control/Recycle_fluid", level.toString());
+    mqttClient.current.publish(
+      "PLKIT/control/Water_level_FE",
+      level.toString()
+    );
   };
 
   return {

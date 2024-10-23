@@ -48,7 +48,8 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.26.2",
     "recharts": "^2.12.7",
-    "web-vitals": "^3.5.2"
+    "web-vitals": "^3.5.2",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "eslint-config-enact-proxy": "^1.0.7"

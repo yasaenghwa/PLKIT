@@ -7,6 +7,7 @@ import { Link, Switch, Route } from "react-router-dom";
 import Overview from "./Overview";
 import Control from "./Control";
 import WebView from "./Webview"; // WebView 컴포넌트 임포트
+import VideoStream from "./VideoStream "; // Community 컴포넌트 가져오기
 
 // Spottable NavButton 생성
 const NavButton = Spottable(
@@ -59,6 +60,9 @@ const Nav = () => {
       <Link to="/control">
         <NavButton>Control</NavButton>
       </Link>
+      <Link to="/VideoStream">
+        <NavButton>VideoStream</NavButton>
+      </Link>
       {/*
       <Link to="/flowcheck">
         <NavButton>Flow Check</NavButton>
@@ -70,7 +74,7 @@ const Nav = () => {
 
       {/* WebView 표시 */}
       {isWebViewOpen && (
-        <WebView url="http://220.149.85.12/" onClose={closeWebView} />
+        <WebView url="http://220.149.85.246/" onClose={closeWebView} />
       )}
     </div>
   );
