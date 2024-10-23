@@ -9,6 +9,7 @@ import Flowcheck from "../components/Flowcheck"; // Flowcheck 컴포넌트 가�
 import Community from "../components/Community"; // Community 컴포넌트 가져오기
 
 // 기존 Routes 안에 새로운 Route 추가
+import VideoStream from "../components/VideoStream"; // Community 컴포넌트 가져오기
 import Overview from "../components/Overview"; // Overview 컴포넌트 가져오기
 import Control from "../components/Control"; // Control 컴포넌트 가져오기
 import FloatingButton from "../components/FloatingButton"; // 플로팅 버튼 임포트
@@ -49,6 +50,9 @@ const MainPanel = kind({
               <SpottableButton to="/control" className={css.navButton}>
                 Control
               </SpottableButton>
+              <SpottableButton to="/VideoStream" className={css.navButton}>
+                VideoStream
+              </SpottableButton>
               <SpottableButton to="/Flowcheck" className={css.navButton}>
                 Flow Check
               </SpottableButton>
@@ -62,6 +66,7 @@ const MainPanel = kind({
               <Routes>
                 <Route path="/" element={<Overview />} />
                 <Route path="/control" element={<Control />} />
+                <Route path="/VideoStream" element={<VideoStream />} />
                 <Route path="/Flowcheck" element={<Flowcheck />} />
                 <Route path="/Community" element={<Community />} />
               </Routes>
