@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
       ...prevValues,
       isPending: true,
     }));
-    let nextUser;
+    let nextUser = null;
     try {
       const res = await axios.get("/users/me");
       nextUser = res.data;
@@ -53,7 +53,6 @@ export function AuthProvider({ children }) {
     setValues((prevValues) => ({
       ...prevValues,
       user: null,
-      avatar: null,
     }));
   }
 
@@ -94,6 +93,13 @@ export function useAuth(required) {
   }
 
   useEffect(() => {
+    console.log(
+      "here",
+      required,
+      context.user,
+      context.isPending,
+      !context.user && !context.isPending
+    );
     if (required && !context.user && !context.isPending) {
       navigate("/login");
     }

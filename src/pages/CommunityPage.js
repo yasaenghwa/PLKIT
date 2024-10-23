@@ -11,7 +11,10 @@ import styles from "./CommunityPage.module.css";
 
 function CommunityPage() {
   const { communityId } = useParams();
+  console.log("communityId:", communityId); // communityId가 제대로 전달되는지 확인
+
   const community = getCommunityById(communityId);
+  console.log("해당 게시글:", community); // 해당 게시글이 제대로 불러와지는지 확인
 
   if (!community) return <Navigate to="/communitys" />;
 
@@ -36,6 +39,18 @@ function CommunityPage() {
               </div>
               <Writer className={styles.author} writer={community.writer} />
             </div>
+
+            {/* 이미지가 있을 경우 렌더링 */}
+            {community.image && (
+              <div className={styles.imageContainer}>
+                <img
+                  src={community.image}
+                  alt="게시물 이미지"
+                  className={styles.communityImage}
+                />
+              </div>
+            )}
+
             <p
               className={styles.content}
               dangerouslySetInnerHTML={{ __html: community.content }}
@@ -67,13 +82,15 @@ function CommunityPage() {
 }
 
 function Writer({ className, writer }) {
+  // writer.avatar 확인을 위한 console.log
+  console.log("Writer component - writer.avatar:", writer.avatar);
+
   return (
     <div className={classNames(className, styles.writer)}>
       <div className={styles.info}>
         <div className={styles.name}>{writer.name}</div>
-        <div className={styles.level}>{writer.level}</div>
       </div>
-      <Avatar photo={writer.profile.photo} name={writer.name} />
+      <Avatar src={writer.profile.photo || "profile.jpg"} alt={writer.name} />
     </div>
   );
 }
