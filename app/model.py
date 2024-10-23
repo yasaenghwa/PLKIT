@@ -20,54 +20,6 @@ class BaseModel:
     def load(self, filepath):
         raise NotImplementedError
 
-class RandomForestModel(BaseModel):
-    def __init__(self, n_estimators=100, random_state=42):
-        self.model = RandomForestRegressor(n_estimators=n_estimators, random_state=random_state)
-
-    def train(self, X, y):
-        self.model.fit(X, y)
-
-    def predict(self, X):
-        return self.model.predict(X)
-
-    def save(self, filepath):
-        joblib.dump(self.model, filepath)
-
-    def load(self, filepath):
-        self.model = joblib.load(filepath)
-
-class LinearRegressionModel(BaseModel):
-    def __init__(self):
-        self.model = LinearRegression()
-
-    def train(self, X, y):
-        self.model.fit(X, y)
-
-    def predict(self, X):
-        return self.model.predict(X)
-
-    def save(self, filepath):
-        joblib.dump(self.model, filepath)
-
-    def load(self, filepath):
-        self.model = joblib.load(filepath)
-
-class XGBoostModel(BaseModel):
-    def __init__(self, n_estimators=100, random_state=42):
-        self.model = XGBRegressor(n_estimators=n_estimators, random_state=random_state)
-
-    def train(self, X, y):
-        self.model.fit(X, y)
-
-    def predict(self, X):
-        return self.model.predict(X)
-
-    def save(self, filepath):
-        joblib.dump(self.model, filepath)
-
-    def load(self, filepath):
-        self.model = joblib.load(filepath)
-
 # TSMixer 정의 (Darts의 TSMixer 사용)
 class TSMixerModel(BaseModel):
     def __init__(self, input_chunk_length=24, output_chunk_length=12, n_epochs=300, model_kwargs=None):

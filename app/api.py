@@ -1,35 +1,34 @@
 # app/api.py
 
 import logging
-import os
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from typing import Optional, Dict, List
 import pandas as pd
 from app.model_manager import ModelManager
 from app.utils import preprocess_data
 from darts import TimeSeries
 
-app = FastAPI()
+# 로깅 설정
+logging.basicConfig(level=logging.INFO)
+logging.info("API 서버 시작됨.")
+
+app = FastAPI(title="TSMixer Model API")
 manager = ModelManager()
 
-class InputData(BaseModel):
-    Air_Humidity_percent: float
-    Solution_Temperature_C: float
-    Solution_TDS_ppm: float
-    Light_Intensity_percent: float
-    Water_Level_Tank_percent: float
-    Flow_Rate_LPM: float
-    Pump_Status_off: int
-    Pump_Status_on: int
-    Fan_Status_off: int
-    Fan_Status_on: int
-    Heater_Status_off: int
-    Heater_Status_on: int
-    LED_Lighting_Status_off: int
-    LED_Lighting_Status_on: int
+class PredictRequest(BaseModel):
+    model_name: str
+    series: Optional[Dict[str, List]] = None
+
+class PredictResponse(BaseModel):
+    predictions: Dict[str, float]
+    series_prediction: Optional[Dict[str, Dict[str, List]]] = None
 
 @app.post("/train")
 def train(model_name: str):
+    """
+    모델을 학습하고 저장하는 엔드포인트.
+    """
     try:
         from app.train_model import train_model  # 동적 임포트
         train_model(model_name)
@@ -38,39 +37,68 @@ def train(model_name: str):
         logging.error(f"모델 학습 중 오류 발생: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/predict")
-def predict(model_name: str, data: InputData):
+@app.post("/predict/", response_model=PredictResponse)
+def predict(request: PredictRequest):
+    """
+    모델을 사용하여 예측을 수행하는 엔드포인트.
+    - `model_name`: 사용할 모델의 이름 (TSMixer_타겟명)
+    - `series`: TSMixer 모델용 시계열 데이터
+    """
+    logging.info(f"예측 요청: {request.model_name}")
+
     try:
-        # 입력 데이터를 DataFrame으로 변환
-        input_df = pd.DataFrame([data.dict()])
+        series_predictions = {}
 
-        # 데이터 전처리
-        series_dict, scaler = preprocess_data(input_df)
+        # TSMixer 모델 예측 처리
+        if request.series:
+            # 시계열 데이터 처리
+            time_index = request.series.get("time_index")
+            values = request.series.get("values")
 
-        # 예측 수행
-        predictions = {}
-        for target, series in series_dict.items():
-            # 각 타겟에 대해 개별 모델 이름 생성
-            if target in ["Water Level Tank (%)", "Nutrient Tank Level (%)", "Recycle Tank Level (%)"]:
-                specific_model_name = f"TSMixer_{target}"
-                if specific_model_name not in manager.list_models():
-                    raise ValueError(f"모델이 존재하지 않습니다: {specific_model_name}")
-                prediction_series = manager.predict(specific_model_name, series, n=1)
-                predictions[target] = prediction_series.values()[0][0]
-            else:
-                # 기타 모델 예측 (필요 시 추가)
-                pass
+            if not time_index or not values:
+                logging.error("시리즈 데이터에 'time_index' 또는 'values'가 없습니다.")
+                raise ValueError("`time_index`와 `values`는 시리즈 데이터에 필수적입니다.")
 
-        return {"predictions": predictions}
+            # 시리즈 데이터 변환
+            series = TimeSeries.from_times_and_values(pd.to_datetime(time_index), values)
+            logging.info(f"시계열 데이터: {request.series}")
+
+            # 모델 이름이 TSMixer로 시작하는지 확인
+            if not request.model_name.startswith("TSMixer"):
+                logging.error("TSMixer 모델만 지원됩니다.")
+                raise ValueError("TSMixer 모델만 지원됩니다.")
+
+            # 예측 수행
+            prediction_series = manager.predict(request.model_name, series, n=1)
+            logging.info(f"TSMixer 예측 결과: {prediction_series}")
+
+            # 예측 결과 변환
+            prediction = {
+                "time_index": prediction_series.time_index.tolist(),
+                "values": prediction_series.values().tolist()
+            }
+            series_predictions["series_prediction"] = prediction
+
+        if not series_predictions:
+            logging.error("TSMixer 모델 예측을 위한 시리즈 데이터가 제공되지 않았습니다.")
+            raise ValueError("TSMixer 모델 예측을 위한 시리즈 데이터가 제공되지 않았습니다.")
+
+        return PredictResponse(
+            predictions={},  # TSMixer 모델만 사용하므로 빈 딕셔너리 유지
+            series_prediction=series_predictions if series_predictions else None
+        )
 
     except ValueError as ve:
         logging.error(f"예측 중 오류 발생: {ve}")
         raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
         logging.error(f"예측 중 오류 발생: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Prediction error: {e}")
 
 @app.get("/models")
 def list_models():
+    """
+    사용 가능한 모든 모델 목록을 반환하는 엔드포인트.
+    """
     models = manager.list_models()
     return {"available_models": models}

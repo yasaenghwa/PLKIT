@@ -1,7 +1,7 @@
 # app/schemas.py
 
 from pydantic import BaseModel
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 class ModelUploadResponse(BaseModel):
     model_name: str
@@ -9,9 +9,8 @@ class ModelUploadResponse(BaseModel):
 
 class PredictRequest(BaseModel):
     model_name: str
-    data: Optional[List[List[float]]] = None  # scikit-learn 모델용 입력 데이터
-    series: Optional[Dict] = None            # TSMixer 모델용 시계열 데이터
+    series: Optional[Dict[str, List]] = None
+    freq: Optional[str] = None  # 빈도 추가
 
 class PredictResponse(BaseModel):
-    prediction: Optional[List[float]] = None       # scikit-learn 모델 예측 결과
-    series_prediction: Optional[Dict] = None       # TSMixer 모델 예측 결과
+    series_prediction: Optional[Dict[str, Dict[str, List]]] = None

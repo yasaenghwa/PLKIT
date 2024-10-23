@@ -39,5 +39,5 @@ def train_model(model_name: str, model_type: str, model_kwargs: Optional[dict] =
 if __name__ == "__main__":
     setup_logging()
     logging.info("모델 학습 시작")
-    train_model("TSMixer_Nutrient", "TSMixer", {"input_chunk_length": 24, "output_chunk_length": 12, "n_epochs": 300})
+    train_model("XGBoost", "XGBoost", {"input_chunk_length": 24, "output_chunk_length": 12, "n_epochs": 30})
     logging.info("모델 학습 종료")

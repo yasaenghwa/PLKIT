@@ -6,3 +6,4 @@ config.conf
 *.log
 *.pt.ckpt
 *.pt
+*.pem

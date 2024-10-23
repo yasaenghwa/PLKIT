@@ -2,16 +2,15 @@
 
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.responses import JSONResponse
-from typing import List, Optional
+from typing import List, Optional, Dict
 import os
-import torch
+import json
 from app.model_manager import ModelManager
 from app.schemas import (
     ModelUploadResponse,
     PredictRequest,
     PredictResponse
 )
-import json
 from darts import TimeSeries
 import pandas as pd
 import logging
@@ -42,26 +41,23 @@ async def upload_model(
 ):
     """
     모델을 업로드하고 로드합니다.
-    - `model_type`: 모델 유형 (RandomForest, LinearRegression, XGBoost, TSMixer)
+    - `model_type`: 모델 유형 (TSMixer)
     - `model_kwargs`: TSMixer 모델에 필요한 추가 인자 (JSON 형식 문자열)
     """
 
     logging.info(f"Received upload request: {file.filename}, type: {model_type}")
 
     # 파일 이름 검증
-    if not file.filename.endswith(".joblib") and not file.filename.endswith(".pt"):
+    if not file.filename.endswith(".pt"):
         logging.error(f"업로드된 파일의 확장자가 유효하지 않습니다: {file.filename}")
-        raise HTTPException(status_code=400, detail="Only .joblib and .pt files are allowed.")
+        raise HTTPException(status_code=400, detail="Only .pt files are allowed for TSMixer.")
 
     model_name, ext = os.path.splitext(file.filename)
 
     # 모델 유형과 파일 확장자 일치 확인
-    if model_type != "TSMixer" and ext != ".joblib":
+    if model_type != "TSMixer" or ext != ".pt":
         logging.error(f"모델 유형과 파일 확장자가 일치하지 않습니다: {model_type}, {ext}")
-        raise HTTPException(status_code=400, detail="Model type and file extension do not match.")
-    if model_type == "TSMixer" and ext != ".pt":
-        logging.error(f"모델 유형과 파일 확장자가 일치하지 않습니다: {model_type}, {ext}")
-        raise HTTPException(status_code=400, detail="Model type and file extension do not match.")
+        raise HTTPException(status_code=400, detail="Model type and file extension do not match. Only TSMixer with .pt files are allowed.")
 
     file_path = os.path.join(MODEL_DIR, file.filename)
 
@@ -111,54 +107,54 @@ def list_models():
 def predict(request: PredictRequest):
     """
     모델을 사용하여 예측을 수행합니다.
-    - `model_name`: 사용할 모델의 이름
-    - `data`: scikit-learn 모델용 입력 데이터 (`RandomForest`, `LinearRegression`, `XGBoost`)
-    - `series`: TSMixer 모델용 입력 데이터 (`TSMixer`)
+    - `model_name`: 사용할 모델의 이름 (TSMixer_타겟명)
+    - `series`: TSMixer 모델용 시계열 데이터
+    - `freq`: 시계열 데이터의 빈도 (예: 'H' for hourly, 'D' for daily)
     """
-
     logging.info(f"예측 요청: {request.model_name}")
 
     try:
-        if request.model_name not in model_manager.available_models:
-            logging.error(f"모델이 존재하지 않습니다: {request.model_name}")
-            raise HTTPException(status_code=404, detail="Model not found.")
+        series_predictions = {}
 
-        model = model_manager.get_model(request.model_name)
-        if isinstance(model, (RandomForestModel, LinearRegressionModel, XGBoostModel)):
-            if request.data is None:
-                logging.error("scikit-learn 모델을 위한 'data'가 제공되지 않았습니다.")
-                raise HTTPException(status_code=400, detail="`data` field is required for this model type.")
+        # TSMixer 모델 예측 처리
+        if request.series:
+            # 시계열 데이터 처리
+            time_index = request.series.get("time_index")
+            values = request.series.get("values")
+            freq = request.freq  # 빈도 추가
 
-            # 입력 데이터를 텐서로 변환
-            input_tensor = torch.tensor(request.data, dtype=torch.float32)
-            logging.info(f"입력 데이터: {request.data}")
+            if not time_index or not values:
+                logging.error("시리즈 데이터에 'time_index' 또는 'values'가 없습니다.")
+                raise ValueError("`time_index`와 `values`는 시리즈 데이터에 필수적입니다.")
 
-            # 예측 수행
-            prediction = model.predict(input_tensor)
-            logging.info(f"예측 결과: {prediction}")
-
-            return PredictResponse(prediction=prediction.tolist())
-
-        elif isinstance(model, TSMixerModel):
-            if request.series is None:
-                logging.error("TSMixer 모델을 위한 'series'가 제공되지 않았습니다.")
-                raise HTTPException(status_code=400, detail="`series` field is required for TSMixer model.")
-
-            # 시계열 데이터 변환
+            # 시리즈 데이터 변환
             try:
-                time_index = request.series.get("time_index")
-                values = request.series.get("values")
-                if not time_index or not values:
-                    logging.error("시계열 데이터에 'time_index' 또는 'values'가 없습니다.")
-                    raise ValueError("`time_index` and `values` fields are required in `series`.")
-                series = TimeSeries.from_times_and_values(pd.to_datetime(time_index), values)
-                logging.info(f"시계열 데이터: {request.series}")
+                if freq:
+                    series = TimeSeries.from_times_and_values(pd.to_datetime(time_index), values, freq=freq)
+                else:
+                    # 빈도가 제공되지 않은 경우, 최소한의 빈도 설정 (예: 'H' for hourly)
+                    if len(time_index) > 1:
+                        inferred_freq = pd.infer_freq(pd.to_datetime(time_index))
+                        if inferred_freq:
+                            series = TimeSeries.from_times_and_values(pd.to_datetime(time_index), values, freq=inferred_freq)
+                        else:
+                            logging.error("시계열 데이터의 빈도를 추론할 수 없습니다.")
+                            raise ValueError("Cannot infer frequency. Please provide `freq`.")
+                    else:
+                        logging.error("단일 데이터 포인트로는 빈도를 추론할 수 없습니다. `freq`를 제공해주세요.")
+                        raise ValueError("Frequency (`freq`) must be provided for single data points.")
+                logging.info(f"시계열 데이터: {request.series}, 빈도: {freq}")
             except Exception as e:
                 logging.error(f"시계열 데이터 변환 오류: {e}")
                 raise HTTPException(status_code=400, detail=f"Invalid `series` format: {e}")
 
+            # 모델 이름이 TSMixer로 시작하는지 확인
+            if not request.model_name.startswith("TSMixer"):
+                logging.error("TSMixer 모델만 지원됩니다.")
+                raise ValueError("TSMixer 모델만 지원됩니다.")
+
             # 예측 수행
-            prediction_series = model.predict(series, n=1)
+            prediction_series = model_manager.predict(request.model_name, series, n=1)
             logging.info(f"TSMixer 예측 결과: {prediction_series}")
 
             # 예측 결과 변환
@@ -166,15 +162,20 @@ def predict(request: PredictRequest):
                 "time_index": prediction_series.time_index.tolist(),
                 "values": prediction_series.values().tolist()
             }
+            series_predictions["series_prediction"] = prediction
 
-            return PredictResponse(series_prediction=prediction)
+        if not series_predictions:
+            logging.error("TSMixer 모델 예측을 위한 시리즈 데이터가 제공되지 않았습니다.")
+            raise ValueError("TSMixer 모델 예측을 위한 시리즈 데이터가 제공되지 않았습니다.")
 
-        else:
-            logging.error("지원되지 않는 모델 유형입니다.")
-            raise HTTPException(status_code=500, detail="Unsupported model type.")
+        return PredictResponse(
+            predictions={},  # TSMixer 모델만 사용하므로 빈 딕셔너리 유지
+            series_prediction=series_predictions if series_predictions else None
+        )
 
-    except HTTPException as he:
-        raise he
+    except ValueError as ve:
+        logging.error(f"예측 중 오류 발생: {ve}")
+        raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
         logging.error(f"예측 수행 중 오류 발생: {e}")
         raise HTTPException(status_code=500, detail=f"Prediction error: {e}")
