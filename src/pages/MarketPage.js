@@ -1,7 +1,7 @@
 // src/pages/MarketPage.js
 
 import { useParams, Navigate, useNavigate } from "react-router-dom";
-import { getMarketById, deleteMarket } from "../api";
+import { getMarketById, deleteMarket, addWishlist } from "../api";
 import styles from "./MarketPage.module.css";
 import { useAuth } from "../contexts/AuthProvider";
 
@@ -23,6 +23,21 @@ function MarketPage() {
       deleteMarket(market.id);
       navigate("/markets");
     }
+  };
+
+  // 데이터 담기 핸들러 함수 추가
+  const handleAddToWishlist = () => {
+    addWishlist(market.slug); // 현재 마켓 아이템을 위시리스트에 추가
+    alert("데이터가 위시리스트에 추가되었습니다.");
+    navigate("/me?tab=wishlist");
+
+    const success = addWishlist(market.slug);
+    if (success) {
+      alert("데이터가 위시리스트에 추가되었습니다.");
+    } else {
+      alert("이미 위시리스트에 존재하는 데이터입니다.");
+    }
+    navigate("/me?tab=wishlist");
   };
 
   return (
@@ -48,9 +63,14 @@ function MarketPage() {
           </div>
         )}
       </div>
-      {/* 구매 및 코스 담기 버튼 */}
+      {/* 구매 및 데이터 담기 버튼 */}
       <div className={styles.buttons}>
-        <button className={styles.addToCourseButton}>+ 코스 담기</button>
+        <button
+          className={styles.addToCourseButton}
+          onClick={handleAddToWishlist} // 클릭 이벤트 추가
+        >
+          + 데이터 담기
+        </button>
         <button className={styles.purchaseButton}>구매하기</button>
       </div>
       {/* 수정 및 삭제 버튼 */}

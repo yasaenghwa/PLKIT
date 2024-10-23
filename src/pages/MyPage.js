@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "../lib/axios";
 import Avatar from "../components/Avatar";
 import LogButton from "../components/LogButton";
@@ -13,10 +13,21 @@ import { useAuth } from "../contexts/AuthProvider";
 import WishlistPage from "./WishlistPage"; // WishlistPage 컴포넌트 추가
 
 function MyPage() {
-  const { user } = useAuth(true); //이 코드에서 useAuth(true)는 사용자가 로그인된 상태인지 확인하고, 로그인이 되어 있지 않으면 로그인 페이지로 리디렉션하는 기능을 제공
+  const { user } = useAuth(true);
   const [links, setLinks] = useState([]);
-  const [activeTab, setActiveTab] = useState("profile"); // 탭 상태 추가
   const navigate = useNavigate();
+  const location = useLocation(); // 현재 URL 정보를 가져옵니다.
+
+  // 쿼리 파라미터에서 탭 정보를 가져옵니다.
+  const queryParams = new URLSearchParams(location.search);
+  const initialTab = queryParams.get("tab") || "profile";
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  // 탭 변경 시 URL 쿼리 파라미터 업데이트
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    navigate(`/me?tab=${tab}`);
+  };
 
   async function getMyLinks() {
     const res = await axios.get("/users/me/links");
@@ -60,17 +71,17 @@ function MyPage() {
             "아래에 등록한 사이트들과 자신에 대해 간단하게 소개하는 설명을 작성해 주세요!"}
         </p>
       </header>
-      {/* 탭 선택 UI 추가 */}
+      {/* 탭 선택 UI */}
       <div className={styles.Tabs}>
         <button
           className={activeTab === "profile" ? styles.active : ""}
-          onClick={() => setActiveTab("profile")}
+          onClick={() => handleTabChange("profile")}
         >
           링크 북마크
         </button>
         <button
           className={activeTab === "wishlist" ? styles.active : ""}
-          onClick={() => setActiveTab("wishlist")}
+          onClick={() => handleTabChange("wishlist")}
         >
           위시리스트
         </button>
@@ -98,7 +109,7 @@ function MyPage() {
           </li>
         </ul>
       )}
-      {activeTab === "wishlist" && <WishlistPage />} {/* WishlistPage 추가 */}
+      {activeTab === "wishlist" && <WishlistPage />}
     </>
   );
 }

@@ -87,20 +87,34 @@ export function addCommunity({ title, content, image, writer }) {
 }
 
 const WISHLIST_KEY = "codethat-wishlist";
-const wishlist = JSON.parse(localStorage.getItem(WISHLIST_KEY) || "{}");
+
+export function getWishlistSlugs() {
+  const wishlist = JSON.parse(localStorage.getItem(WISHLIST_KEY) || "[]");
+  return Array.isArray(wishlist) ? wishlist : [];
+}
 
 export function addWishlist(marketSlug) {
-  wishlist[marketSlug] = true;
-  localStorage.setItem(WISHLIST_KEY, JSON.stringify(wishlist));
+  if (!marketSlug) {
+    console.error("유효하지 않은 marketSlug입니다:", marketSlug);
+    return false;
+  }
+
+  const wishlist = getWishlistSlugs();
+
+  if (!wishlist.includes(marketSlug)) {
+    wishlist.push(marketSlug);
+    localStorage.setItem(WISHLIST_KEY, JSON.stringify(wishlist));
+    return true;
+  }
+
+  return false;
 }
 
+// 위시리스트에서 아이템 삭제
 export function deleteWishlist(marketSlug) {
-  delete wishlist[marketSlug];
+  let wishlist = getWishlistSlugs();
+  wishlist = wishlist.filter((slug) => slug !== marketSlug);
   localStorage.setItem(WISHLIST_KEY, JSON.stringify(wishlist));
-}
-
-export function getWishlist() {
-  return markets.filter((market) => wishlist[market.slug]);
 }
 
 // 마켓 게시물 ID로 가져오기 함수 추가

@@ -171,14 +171,14 @@ function MarketListPage() {
             />
             <textarea
               value={content}
-              placeholder="내용"
+              placeholder="설명"
               onChange={(e) => setContent(e.target.value)}
               className={styles.inputField}
             />
             <input
               type="text"
               value={crop}
-              placeholder="농작물"
+              placeholder="재배 작물"
               onChange={(e) => setCrop(e.target.value)}
               className={styles.inputField}
             />
@@ -193,7 +193,7 @@ function MarketListPage() {
             <input
               type="text"
               value={location}
-              placeholder="위치 및 장소"
+              placeholder="생산지"
               onChange={(e) => setLocation(e.target.value)}
               className={styles.inputField}
             />
