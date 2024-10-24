@@ -74,7 +74,7 @@ const Nav = () => {
 
       {/* WebView 표시 */}
       {isWebViewOpen && (
-        <WebView url="http://220.149.85.246/" onClose={closeWebView} />
+        <WebView url="http://220.149.85.28/" onClose={closeWebView} />
       )}
     </div>
   );

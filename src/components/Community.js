@@ -8,7 +8,7 @@ const Community = kind({
     return (
       <div style={{ width: "100%", height: "100%" }}>
         <iframe
-          src="http://220.149.85.246/" // 원하는 링크로 변경하세요
+          src="https://test-chi-three-99.vercel.app/" // 원하는 링크로 변경하세요
           style={{ width: "100%", height: "100%", border: "none" }}
         />
       </div>
