@@ -71,7 +71,7 @@ const FloatingButton = () => {
       {/* WebView 컴포넌트 */}
       {isWebViewOpen && (
         <FloatingLayer open>
-          <WebView url="http://220.149.85.246/" onClose={closeWebView} />
+          <WebView url="http://220.149.85.28/" onClose={closeWebView} />
         </FloatingLayer>
       )}
 
