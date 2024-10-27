@@ -7,3 +7,4 @@ config.conf
 *.pt.ckpt
 *.pt
 *.pem
+config.py

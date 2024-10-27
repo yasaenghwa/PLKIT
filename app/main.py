@@ -2,6 +2,7 @@
 
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional, Dict
 import os
 import json
@@ -15,7 +16,19 @@ from darts import TimeSeries
 import pandas as pd
 import logging
 
+# 설정 파일에서 CORS_ORIGINS 가져오기
+from app.config import CORS_ORIGINS
+
 app = FastAPI(title="ML Model API")
+
+# CORS 설정
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CORS_ORIGINS,     # config.py에서 가져온 origins 사용
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # 모델이 저장될 디렉토리
 MODEL_DIR = "models"
@@ -109,7 +122,6 @@ def predict(request: PredictRequest):
     모델을 사용하여 예측을 수행합니다.
     - `model_name`: 사용할 모델의 이름 (TSMixer_타겟명)
     - `series`: TSMixer 모델용 시계열 데이터
-    - `freq`: 시계열 데이터의 빈도 (예: 'H' for hourly, 'D' for daily)
     """
     logging.info(f"예측 요청: {request.model_name}")
 
@@ -121,7 +133,6 @@ def predict(request: PredictRequest):
             # 시계열 데이터 처리
             time_index = request.series.get("time_index")
             values = request.series.get("values")
-            freq = request.freq  # 빈도 추가
 
             if not time_index or not values:
                 logging.error("시리즈 데이터에 'time_index' 또는 'values'가 없습니다.")
@@ -129,21 +140,20 @@ def predict(request: PredictRequest):
 
             # 시리즈 데이터 변환
             try:
-                if freq:
-                    series = TimeSeries.from_times_and_values(pd.to_datetime(time_index), values, freq=freq)
+                # 데이터 포인트 수에 따라 빈도 설정
+                if len(time_index) == 1:
+                    # 단일 데이터 포인트인 경우, 빈도를 'H' (시간별)로 설정 (필요에 따라 변경 가능)
+                    series = TimeSeries.from_times_and_values(pd.to_datetime(time_index), values, freq='H')
+                    logging.info("단일 데이터 포인트의 빈도를 'H'로 설정했습니다.")
                 else:
-                    # 빈도가 제공되지 않은 경우, 최소한의 빈도 설정 (예: 'H' for hourly)
-                    if len(time_index) > 1:
-                        inferred_freq = pd.infer_freq(pd.to_datetime(time_index))
-                        if inferred_freq:
-                            series = TimeSeries.from_times_and_values(pd.to_datetime(time_index), values, freq=inferred_freq)
-                        else:
-                            logging.error("시계열 데이터의 빈도를 추론할 수 없습니다.")
-                            raise ValueError("Cannot infer frequency. Please provide `freq`.")
+                    # 여러 데이터 포인트인 경우, 빈도를 추론
+                    inferred_freq = pd.infer_freq(pd.to_datetime(time_index))
+                    if inferred_freq:
+                        series = TimeSeries.from_times_and_values(pd.to_datetime(time_index), values, freq=inferred_freq)
+                        logging.info(f"시계열 데이터의 빈도를 추론했습니다: {inferred_freq}")
                     else:
-                        logging.error("단일 데이터 포인트로는 빈도를 추론할 수 없습니다. `freq`를 제공해주세요.")
-                        raise ValueError("Frequency (`freq`) must be provided for single data points.")
-                logging.info(f"시계열 데이터: {request.series}, 빈도: {freq}")
+                        logging.error("시계열 데이터의 빈도를 추론할 수 없습니다.")
+                        raise ValueError("Cannot infer frequency. Please ensure consistent time intervals or provide multiple data points.")
             except Exception as e:
                 logging.error(f"시계열 데이터 변환 오류: {e}")
                 raise HTTPException(status_code=400, detail=f"Invalid `series` format: {e}")
@@ -169,7 +179,6 @@ def predict(request: PredictRequest):
             raise ValueError("TSMixer 모델 예측을 위한 시리즈 데이터가 제공되지 않았습니다.")
 
         return PredictResponse(
-            predictions={},  # TSMixer 모델만 사용하므로 빈 딕셔너리 유지
             series_prediction=series_predictions if series_predictions else None
         )
 
