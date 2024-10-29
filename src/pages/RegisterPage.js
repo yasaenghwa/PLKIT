@@ -39,13 +39,24 @@ function RegisterPage() {
       return;
     }
     const { name, email, password } = values;
-    await axios.post("/users", {
-      name,
-      email,
-      password,
-    });
-    await login({ email, password });
-    navigate("/me");
+
+    try {
+      console.log("회원가입 요청 데이터:", { name, email, password });
+      const response = await axios.post("/auth/signup", {
+        name,
+        email,
+        password,
+      });
+      console.log("회원가입 성공:", response.data);
+
+      await login({ email, password });
+      navigate("/me");
+    } catch (error) {
+      console.error("회원가입 실패:", error);
+      if (error.response) {
+        console.error("서버 응답 오류:", error.response.data); // 서버에서 제공하는 구체적인 오류 메시지
+      }
+    }
   }
 
   useEffect(() => {
