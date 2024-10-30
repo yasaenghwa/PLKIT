@@ -14,6 +14,7 @@ import WishlistPage from "./WishlistPage"; // WishlistPage 컴포넌트 추가
 
 function MyPage() {
   const { user } = useAuth(true);
+  console.log("최신 사용자 정보:", user); // 확인용 콘솔 로그 추가
   const [links, setLinks] = useState([]);
   const navigate = useNavigate();
   const location = useLocation(); // 현재 URL 정보를 가져옵니다.
