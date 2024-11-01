@@ -1,0 +1,93 @@
+/* src/pages/MarketPage.module.css */
+
+.marketPage {
+  padding: 20px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.image {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto 20px;
+  display: block;
+}
+
+.content {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.additionalInfo p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.hashtags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.hashtag {
+  background-color: #e0e0e0;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.addToCourseButton,
+.purchaseButton {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.addToCourseButton {
+  background-color: #3baf57;
+  color: #fff;
+}
+
+.addToCourseButton:hover {
+  background-color: #329d4b;
+}
+
+.purchaseButton {
+  background-color: #ff9800;
+  color: #fff;
+}
+
+.purchaseButton:hover {
+  background-color: #fb8c00;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.actions button {
+  padding: 5px 10px;
+  border: none;
+  background-color: #f44336;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.actions button:hover {
+  background-color: #e53935;
+}
