@@ -6,6 +6,7 @@ import LogCard from "../components/LogCard";
 import HorizontalRule from "../components/HorizontalRule";
 import styles from "./UserPage.module.css";
 import LinkCard from "../components/LinkCard";
+import "../axiosConfig"; // axios 설정 파일을 import하여 인터셉터 설정 적용
 
 function UserPage() {
   const [user, setUser] = useState(null);

@@ -1,11 +1,15 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import Container from "./Container";
+import axios from "../lib/axios";
+
 //import UserMenu from "./UserMenu";
 import logoImg from "../assets/logo.svg";
 import styles from "./Nav.module.css";
 import { useAuth } from "../contexts/AuthProvider"; // 예시로 useAuth 훅을 사용
 import LogButton from "./LogButton";
 import Avatar from "./Avatar";
+import "../axiosConfig"; // axios 설정 파일을 import하여 인터셉터 설정 적용
 
 function getLinkStyle({ isActive }) {
   return {
@@ -28,6 +32,30 @@ export function PublicNav() {
 function Nav() {
   const { user, logout } = useAuth(); // user와 logout 가져오기
   const navigate = useNavigate(); // useNavigate 훅으로 페이지 이동
+  const [avatarUrl, setAvatarUrl] = useState(null); // 아바타 이미지 상태 추가
+
+  // 아바타 이미지를 가져오는 함수
+  async function fetchAvatar() {
+    try {
+      const res = await axios.get("/users/me/avatar", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        responseType: "blob", // Blob 형식으로 응답
+      });
+      const imageUrl = URL.createObjectURL(res.data); // Blob을 URL로 변환
+      setAvatarUrl(imageUrl); // 상태에 저장
+    } catch (error) {
+      console.error("아바타 이미지 가져오기 오류:", error);
+    }
+  }
+
+  // user 정보가 업데이트될 때 아바타 이미지 불러오기
+  useEffect(() => {
+    if (user && user.avatar) {
+      fetchAvatar();
+    }
+  }, [user]);
 
   // 프로필 아바타를 눌렀을 때 홈으로 이동
   const handleAvatarClick = () => {
@@ -47,7 +75,7 @@ function Nav() {
             </NavLink>
           </li>
           <li>
-            <NavLink style={getLinkStyle} to="/communitys">
+            <NavLink style={getLinkStyle} to="/communities">
               Community
             </NavLink>
           </li>
@@ -57,7 +85,7 @@ function Nav() {
                 {user.name}
                 {/* 아바타를 클릭하면 홈 페이지로 이동 */}
                 <Avatar
-                  src={user.avatar}
+                  src={avatarUrl}
                   size="small"
                   onClick={handleAvatarClick}
                 />

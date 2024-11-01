@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../lib/axios";
 import qs from "qs"; // 쿼리 스트링 변환을 위한 qs 라이브러리
+import "../axiosConfig"; // axios 설정 파일을 import하여 인터셉터 설정 적용
 
 const AuthContext = createContext({
   user: null,
@@ -10,6 +11,8 @@ const AuthContext = createContext({
   logout: () => {},
   updateMe: () => {},
 });
+
+const BASE_URL = process.env.REACT_APP_BASE_URL; // .env에서 가져온 서버 URL
 
 export function AuthProvider({ children }) {
   const [values, setValues] = useState({
@@ -32,6 +35,11 @@ export function AuthProvider({ children }) {
         },
       });
       nextUser = res.data;
+
+      // avatar가 상대 경로라면 서버 URL과 결합하여 절대 경로로 설정
+      if (nextUser.avatar && !nextUser.avatar.startsWith("http")) {
+        nextUser.avatar = `${BASE_URL}/${nextUser.avatar}`;
+      }
     } catch (error) {
       if (error.response?.status === 401) {
         await axios.post("/auth/token");
@@ -42,6 +50,9 @@ export function AuthProvider({ children }) {
           },
         });
         nextUser = res.data;
+        if (nextUser.avatar) {
+          nextUser.avatar = `${BASE_URL}/${nextUser.avatar}`;
+        }
       }
     } finally {
       setValues((prevValues) => ({
@@ -85,12 +96,73 @@ export function AuthProvider({ children }) {
   }
 
   async function updateMe(formData) {
-    const res = await axios.patch("/users/me", formData);
-    const nextUser = res.data;
-    setValues((prevValues) => ({
-      ...prevValues,
-      user: nextUser,
-    }));
+    const { name, avatar } = formData;
+
+    // 이름 업데이트 - 쿼리 파라미터 사용
+    if (name) {
+      try {
+        await axios.patch(
+          `/users/me/name?name=${encodeURIComponent(name)}`, // 쿼리 파라미터로 name 전달
+          null,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              accept: "application/json",
+            },
+          }
+        );
+      } catch (error) {
+        console.error("이름 업데이트 오류:", error);
+      }
+    }
+
+    // 아바타 업데이트
+    if (avatar) {
+      const avatarFormData = new FormData();
+      avatarFormData.append("avatar", avatar);
+
+      try {
+        await axios.patch("/users/me/avatar", avatarFormData, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        // 아바타 업데이트 후 새로운 URL을 가져옴
+        const avatarRes = await axios.get("/users/me/avatar", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            accept: "*/*",
+          },
+          responseType: "blob",
+        });
+        const newAvatarURL = URL.createObjectURL(avatarRes.data);
+        setValues((prevValues) => ({
+          ...prevValues,
+          user: { ...prevValues.user, avatar: newAvatarURL },
+        }));
+      } catch (error) {
+        console.error("아바타 업데이트 오류:", error);
+      }
+    }
+
+    // 모든 업데이트 후 최신 사용자 정보 가져오기
+    try {
+      const res = await axios.get("/users/me", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          accept: "application/json",
+        },
+      });
+      const nextUser = res.data;
+      setValues((prevValues) => ({
+        ...prevValues,
+        user: nextUser,
+      }));
+    } catch (error) {
+      console.error("사용자 정보 가져오기 오류:", error);
+    }
   }
 
   useEffect(() => {

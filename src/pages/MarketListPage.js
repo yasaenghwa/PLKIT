@@ -3,7 +3,12 @@ import { useSearchParams } from "react-router-dom";
 import ListPage from "../components/ListPage";
 import Warn from "../components/Warn";
 import MarketItem from "../components/MarketItem";
-import { getMarkets, addMarket } from "../api"; // addMarket 함수 추가
+import {
+  getMarkets,
+  addMarket,
+  uploadMarketImage,
+  fetchMarketImage,
+} from "../api"; // addMarket 함수 추가
 import styles from "./MarketListPage.module.css";
 import searchBarStyles from "../components/SearchBar.module.css";
 import searchIcon from "../assets/search.svg";
@@ -26,23 +31,34 @@ function MarketListPage() {
   const [hashtags, setHashtags] = useState([]);
   const [image, setImage] = useState(null);
   const [tagInput, setTagInput] = useState("");
-
+  const [marketPosts, setMarketPosts] = useState([]);
+  const [marketId, setMarketId] = useState(null); // 업로드 후 게시물 ID 저장
   const { user } = useAuth(); // 로그인한 사용자 정보
 
+  // API로부터 마켓 게시물 목록 가져오는 함수
+  async function fetchMarketPosts() {
+    try {
+      const posts = await getMarkets(keyword); // API 호출
+      setMarketPosts(posts); // 상태에 API 응답 데이터 설정
+    } catch (error) {
+      console.error("마켓 게시물 가져오기 오류:", error);
+      alert("마켓 데이터를 가져오는 중 오류가 발생했습니다.");
+    }
+  }
+
   useEffect(() => {
-    const storedMarkets = JSON.parse(localStorage.getItem("markets")) || [];
-    const filteredMarkets = initKeyword
-      ? storedMarkets.filter((market) =>
-          market.title.toLowerCase().includes(initKeyword.toLowerCase())
-        )
-      : storedMarkets;
-    setMarkets(filteredMarkets);
-  }, [initKeyword]);
+    fetchMarketPosts();
+  }, [keyword]); // keyword가 변경될 때마다 fetchMarketPosts 호출
+
+  useEffect(() => {
+    console.log("markets 상태:", markets);
+  }, [markets]); // markets 상태가 변경될 때마다 확인
 
   const handleKeywordChange = (e) => setKeyword(e.target.value);
   const handleSubmit = (e) => {
     e.preventDefault();
     setSearchParam(keyword ? { keyword } : {});
+    fetchMarketPosts(); // 검색어 변경 후 마켓 게시물 목록 갱신
   };
 
   // 해시태그 입력 처리
@@ -68,9 +84,19 @@ function MarketListPage() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImage(URL.createObjectURL(file));
+      setImage(file);
     }
   };
+
+  useEffect(() => {
+    const storedMarkets = JSON.parse(localStorage.getItem("markets")) || [];
+    const filteredMarkets = initKeyword
+      ? storedMarkets.filter((market) =>
+          market.title.toLowerCase().includes(initKeyword.toLowerCase())
+        )
+      : storedMarkets;
+    setMarkets(filteredMarkets);
+  }, [initKeyword]);
 
   // 게시물 등록 처리
   const handlePostSubmit = async (e) => {
@@ -88,6 +114,7 @@ function MarketListPage() {
     }
 
     try {
+      // 1. 게시물 추가 API 호출
       const newMarket = await addMarket({
         title,
         content,
@@ -97,7 +124,6 @@ function MarketListPage() {
         farmName,
         cultivationPeriod,
         hashtags,
-        image,
         writer: {
           id: user.id,
           name: user.name,
@@ -108,8 +134,23 @@ function MarketListPage() {
       });
 
       if (newMarket) {
+        // 2. 이미지가 있을 경우 이미지 업로드
+        if (image) {
+          try {
+            await uploadMarketImage(newMarket.id, image);
+            console.log("이미지 업로드 성공");
+          } catch (imageUploadError) {
+            console.error("이미지 업로드 중 오류 발생:", imageUploadError);
+            alert(
+              "이미지 업로드에 실패했습니다. 게시물은 이미지 없이 등록됩니다."
+            );
+          }
+        }
+
+        // 3. 등록된 게시물 목록에 추가
         setMarkets((prevMarkets) => [newMarket, ...prevMarkets]);
-        // 폼 초기화
+
+        // 4. 폼 초기화
         setTitle("");
         setContent("");
         setCrop("");
@@ -120,6 +161,8 @@ function MarketListPage() {
         setHashtags([]);
         setImage(null);
         setTagInput("");
+
+        alert("게시물이 성공적으로 등록되었습니다.");
       } else {
         console.warn("중복된 게시물이 발견되어 추가되지 않았습니다.");
       }
@@ -139,11 +182,11 @@ function MarketListPage() {
         <input
           name="keyword"
           value={keyword}
-          onChange={handleKeywordChange}
+          onChange={(e) => setKeyword(e.target.value)}
           placeholder="검색으로 데이터 찾기"
         />
         <button type="submit">
-          <img src={searchIcon} alt="검색" />
+          <img src={searchIcon} onClick={fetchMarketPosts} alt="검색" />
         </button>
       </form>
 

@@ -34,12 +34,14 @@ function SettingPage() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("avatar", values.avatar);
-    formData.append("name", values.name);
-    formData.append("email", values.email);
-    formData.append("bio", values.bio);
-    await updateMe(formData);
+
+    const formData = {};
+    if (values.name) formData.name = values.name;
+    if (values.avatar) formData.avatar = values.avatar;
+    if (values.email) formData.email = values.email;
+    if (values.bio) formData.bio = values.bio;
+
+    await updateMe(formData); // 업데이트 후 getMe 호출 포함됨
     navigate("/me");
   }
 

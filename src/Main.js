@@ -44,7 +44,7 @@ function Main() {
             <Route index element={<MarketListPage />} />
             <Route path=":marketId" element={<MarketPage />} /> {/* 수정 */}
           </Route>
-          <Route path="communitys">
+          <Route path="communities">
             <Route index element={<CommunityListPage />} />
             <Route path=":communityId" element={<CommunityPage />} />
           </Route>

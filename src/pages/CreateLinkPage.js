@@ -27,7 +27,7 @@ function CreateLinkPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     const { title, url } = values;
-    await axios.post("/users/me/links", { title, url });
+    await axios.post("/usersnks", { title, url });
     navigate("/me");
   }
 

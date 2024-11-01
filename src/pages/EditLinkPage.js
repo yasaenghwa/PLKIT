@@ -6,7 +6,7 @@ import Input from "../components/Input";
 import LogButton from "../components/LogButton";
 import styles from "./EditLinkPage.module.css";
 import { useAuth } from "../contexts/AuthProvider";
-
+import "../axiosConfig"; // axios 설정 파일을 import하여 인터셉터 설정 적용
 function EditLinkPage() {
   const [values, setValues] = useState({
     title: "",
@@ -18,9 +18,18 @@ function EditLinkPage() {
   useAuth(true);
 
   async function getLink() {
-    const res = await axios.get(`/users/me/links/${params.linkId}`);
-    const { title, url } = res.data;
-    setValues({ title, url });
+    try {
+      const res = await axios.get(`users/me/links${params.linkId}`);
+      const { title, url } = res.data;
+      setValues({ title, url });
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        console.warn("404 에러 무시: 요청한 리소스를 찾을 수 없습니다.");
+        return null; // 404 에러 무시하고 null 반환
+      } else {
+        throw error; // 다른 에러는 그대로 throw하여 화면에 표시
+      }
+    }
   }
 
   function handleChange(e) {
@@ -33,10 +42,19 @@ function EditLinkPage() {
   }
 
   async function handleSubmit(e) {
-    e.preventDefault();
-    const { title, url } = values;
-    await axios.patch(`/users/me/links/${params.linkId}`, { title, url });
-    navigate("/me");
+    try {
+      e.preventDefault();
+      const { title, url } = values;
+      await axios.patch(`users/me/links`, { title, url });
+      navigate("/me");
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        console.warn("404 에러 무시: 요청한 리소스를 찾을 수 없습니다.");
+        return null; // 404 에러 무시하고 null 반환
+      } else {
+        throw error; // 다른 에러는 그대로 throw하여 화면에 표시
+      }
+    }
   }
 
   useEffect(() => {
