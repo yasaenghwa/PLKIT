@@ -1,0 +1,14 @@
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+
+# Log files
+nohup.out
+
+# Environment variables
+.env
+
+# Uploaded files
+uploads/
