@@ -1,7 +1,124 @@
 import mock from "./mock.json";
 import { v4 as uuidv4 } from "uuid";
-const { markets, communitys } = mock;
 
+import axios from "axios";
+import "../axiosConfig"; // axios 설정 파일을 import하여 인터셉터 설정 적용
+const BASE_URL = process.env.REACT_APP_BASE_URL; // .env에서 가져온 서버 URL
+
+// 1. 커뮤니티 게시물 이미지 업로드 함수
+export async function uploadCommunityImage(communityId, file) {
+  console.log("communityId:", communityId); // communityId가 제대로 전달되는지 확인
+
+  if (!communityId) {
+    console.error("communityId가 유효하지 않습니다.");
+    return null; // communityId가 없을 경우 요청하지 않음
+  }
+
+  const formData = new FormData();
+  formData.append("file", file); // 선택된 파일을 formData에 추가
+
+  try {
+    // community_id에 맞춰 이미지 업로드 요청
+    const response = await axios.post(
+      `${BASE_URL}/communities/${communityId}/image`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          accept: "application/json",
+        },
+      }
+    );
+    return response.data; // 서버에서 반환된 파일명 데이터
+  } catch (error) {
+    console.error("커뮤니티 게시물 이미지 업로드 오류:", error);
+    return null;
+  }
+}
+
+// 2. 커뮤니티 게시물 이미지 조회 함수
+export async function fetchCommunityImage(communityId) {
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/communities/${communityId}/image`,
+      {
+        headers: { accept: "*/*" },
+        responseType: "blob", // 이미지 데이터를 binary로 받아오기 위해 responseType을 blob으로 설정
+      }
+    );
+    return URL.createObjectURL(response.data); // Blob 객체를 URL로 변환하여 반환
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
+      console.warn("이미지를 찾을 수 없습니다.");
+      return null; // 이미지가 없으면 null을 반환
+    } else {
+      console.error("커뮤니티 게시물 이미지 조회 오류:", error);
+      throw error;
+    }
+  }
+}
+
+// 1. 커뮤니티 목록 가져오기 (API 요청으로 변경)
+export async function getCommunitys(keyword) {
+  try {
+    const response = await axios.get(`${BASE_URL}/communities`, {
+      params: { keyword },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("커뮤니티 목록 가져오기 오류:", error);
+    return [];
+  }
+}
+
+// 2. 특정 커뮤니티 게시글 가져오기 (API 요청으로 변경)
+export async function getCommunityById(communityId) {
+  try {
+    const response = await axios.get(`${BASE_URL}/communities/${communityId}`);
+    return response.data;
+  } catch (error) {
+    console.error("커뮤니티 게시글 가져오기 오류:", error);
+    return null;
+  }
+}
+
+// 3. 새로운 커뮤니티 게시글 추가 함수 (JSON 형식으로 POST 요청)
+export async function addCommunity({ title, content, writer_id }) {
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/communities`,
+      {
+        title,
+        content,
+        writer_id,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          accept: "application/json",
+        },
+      }
+    );
+    console.log("addCommunity - response.data:", response.data); // response.data 확인
+    return response.data;
+  } catch (error) {
+    console.error("커뮤니티 게시글 추가 오류:", error);
+    return null;
+  }
+}
+
+// 4. 커뮤니티 게시글 삭제 (API 요청으로 변경)
+export async function deleteCommunity(communityId) {
+  try {
+    await axios.delete(`${BASE_URL}/communities/${communityId}`);
+    return true;
+  } catch (error) {
+    console.error("커뮤니티 게시글 삭제 오류:", error);
+    return false;
+  }
+}
+
+/** 
 function filterByKeyword(items, keyword) {
   const lowered = keyword.toLowerCase();
   return items.filter(({ title }) => title.toLowerCase().includes(lowered));
@@ -16,75 +133,7 @@ export function getMarkets(keyword) {
 export function getMarketBySlug(marketSlug) {
   return markets.find((market) => market.slug === marketSlug);
 }
-
-export function getCommunitys(keyword) {
-  if (!keyword) return communitys;
-  return filterByKeyword(communitys, keyword);
-}
-
-export function getCommunityById(communityId) {
-  const communitys = JSON.parse(localStorage.getItem("communitys")) || [];
-  return communitys.find((community) => community.id === communityId);
-}
-
-// 새로운 기능 추가: 게시글 추가하기
-export function addCommunity({ title, content, image, writer }) {
-  // writer 객체 로그 확인
-  console.log("addCommunity - writer:", writer);
-
-  // writer 객체에서 user 정보 확인
-  if (!writer || !writer.id) {
-    throw new Error("로그인이 필요합니다."); // 로그인이 되어 있지 않으면 오류 발생
-  }
-
-  // 기존 communitys 데이터를 가져옴 (로컬 스토리지 또는 초기화)
-  let communitys = JSON.parse(localStorage.getItem("communitys")) || [];
-
-  // 로그 추가: 이미지 URL 확인
-  console.log("addCommunity - 이미지 URL:", image);
-
-  // 새로운 게시글 객체 생성
-  const newCommunity = {
-    id: uuidv4(), // UUID를 사용해 고유한 ID 생성
-    title,
-    content,
-    image, // 이미지 URL 추가
-    writer: {
-      id: writer.id, // 작성자의 ID
-      name: writer.name, // 작성자의 이름
-      profile: { photo: writer.profile?.photo || "default_avatar.svg" }, // 프로필 사진 확인
-    },
-    createdAt: new Date().toISOString(),
-    answers: [],
-  };
-
-  // communitys 배열 업데이트 로그
-  console.log("Adding new community:", newCommunity);
-
-  // 중복된 게시글이 있는지 확인 (ID뿐만 아니라 제목과 내용도 비교)
-  const isDuplicate = communitys.some(
-    (community) =>
-      community.title === newCommunity.title &&
-      community.content === newCommunity.content
-  );
-
-  if (isDuplicate) {
-    console.warn("중복된 게시글이 발견되었습니다. 추가하지 않습니다.");
-    return null; // 중복된 게시글이 있으면 추가하지 않음
-  }
-
-  // 기존 communitys에 새로운 게시글 추가
-  communitys.unshift(newCommunity);
-
-  // 저장된 데이터를 확인하는 로그 추가
-  console.log("저장된 게시글들:", communitys);
-
-  // 업데이트된 communitys를 로컬 스토리지에 저장
-  localStorage.setItem("communitys", JSON.stringify(communitys));
-
-  // 새로운 게시글 반환
-  return newCommunity;
-}
+*/
 
 const WISHLIST_KEY = "codethat-wishlist";
 
@@ -118,11 +167,21 @@ export function deleteWishlist(marketSlug) {
 }
 
 // 마켓 게시물 ID로 가져오기 함수 추가
-export function getMarketById(marketId) {
-  const markets = JSON.parse(localStorage.getItem("markets")) || [];
-  return markets.find((market) => market.id === marketId);
+export async function getMarketById(marketId) {
+  try {
+    const response = await axios.get(`${BASE_URL}/markets/${marketId}`, {
+      headers: {
+        accept: "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("마켓 상세 조회 오류:", error);
+    throw error;
+  }
 }
 
+/** 
 // 새로운 기능 추가: 마켓 게시물 추가하기
 export function addMarket({
   title,
@@ -160,6 +219,7 @@ export function addMarket({
     },
     createdAt: new Date().toISOString(),
   };
+  
 
   // 중복 확인
   const isDuplicate = markets.some(
@@ -177,9 +237,108 @@ export function addMarket({
 
   return newMarket;
 }
+  */
+
+// 마켓 게시물 추가 API 요청 함수로 수정
+export async function addMarket({
+  title,
+  content,
+  crop,
+  price,
+  location,
+  farmName,
+  cultivationPeriod,
+  hashtags = [],
+  image,
+  writer,
+}) {
+  if (!writer || !writer.id) {
+    throw new Error("로그인이 필요합니다.");
+  }
+
+  // 서버로 보낼 요청 데이터 준비
+  const payload = {
+    title,
+    content,
+    crop,
+    price,
+    location,
+    farm_name: farmName,
+    cultivation_period: cultivationPeriod,
+    hashtags,
+    image,
+    writer_id: writer.id,
+  };
+
+  try {
+    // 서버에 POST 요청(markets)
+    const response = await axios.post(`${BASE_URL}/markets`, payload);
+    return response.data; // 서버에서 받은 응답 데이터 반환
+  } catch (error) {
+    console.error("마켓 게시물 추가 오류:", error);
+    return null;
+  }
+}
+
+// 마켓 게시물 목록 조회 함수 (검색어 필터링 가능)
+export async function getMarkets(keyword) {
+  try {
+    // 요청 URL과 파라미터 구성
+    const response = await axios.get(`${BASE_URL}/markets`, {
+      params: { keyword },
+      headers: { accept: "application/json" },
+    });
+    return response.data; // 응답 데이터 반환
+  } catch (error) {
+    console.error("마켓 게시물 목록 조회 오류:", error);
+    return []; // 오류 발생 시 빈 배열 반환
+  }
+}
 
 export function deleteMarket(id) {
   let markets = JSON.parse(localStorage.getItem("markets")) || [];
   markets = markets.filter((market) => market.id !== id);
   localStorage.setItem("markets", JSON.stringify(markets));
+}
+
+// 1. 특정 마켓 게시물의 이미지 업로드 함수
+export async function uploadMarketImage(marketId, file) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/markets/${marketId}/image`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          accept: "application/json",
+        },
+      }
+    );
+    return response.data; // { "filename": "uploaded_image_name.jpg" }
+  } catch (error) {
+    console.error("마켓 게시물 이미지 업로드 오류:", error);
+    return null;
+  }
+}
+
+// 2. 특정 마켓 게시물의 이미지 조회 함수
+export async function fetchMarketImage(marketId) {
+  try {
+    const response = await axios.get(`${BASE_URL}/markets/${marketId}/image`, {
+      headers: { accept: "*/*" },
+      responseType: "blob", // 이미지 데이터를 binary로 받아오기 위해 responseType을 blob으로 설정
+    });
+    return URL.createObjectURL(response.data); // Blob 객체를 URL로 변환하여 반환
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
+      console.warn("이미지를 찾을 수 없습니다.");
+      return null; // 이미지가 없으면 null을 반환
+    } else {
+      console.error("마켓 게시물 이미지 조회 오류:", error);
+      throw error;
+    }
+  }
 }

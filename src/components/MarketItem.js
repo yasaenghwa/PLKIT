@@ -5,8 +5,11 @@ import Card from "./Card";
 import styles from "./MarketItem.module.css";
 import { useAuth } from "../contexts/AuthProvider";
 
+const BASE_URL = process.env.REACT_APP_BASE_URL; // .env에서 가져온 서버 URL
+
 function MarketItem({ market, onDelete, onEdit }) {
   const { user } = useAuth();
+  console.log("market 데이터:", market); // 데이터 내용 확인
 
   return (
     <Card className={styles.marketItem}>
@@ -38,16 +41,12 @@ function MarketItem({ market, onDelete, onEdit }) {
         )}
       </div>
       {/* 수정 및 삭제 버튼 */}
-      {user &&
-        market.writer &&
-        market.writer.id &&
-        user.id &&
-        market.writer.id === user.id && (
-          <div className={styles.actions}>
-            <button onClick={() => onEdit(market)}>수정</button>
-            <button onClick={() => onDelete(market.id)}>삭제</button>
-          </div>
-        )}
+      {user && market.writer && market.writer.id === user.id && (
+        <div className={styles.actions}>
+          <button onClick={() => onEdit(market)}>수정</button>
+          <button onClick={() => onDelete(market.id)}>삭제</button>
+        </div>
+      )}
     </Card>
   );
 }
