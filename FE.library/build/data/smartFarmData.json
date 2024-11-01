@@ -1,0 +1,60 @@
+{
+  "tempHumData": [
+    { "name": "1일", "temp": 24, "hum": 65 },
+    { "name": "2일", "temp": 25, "hum": 66 },
+    { "name": "3일", "temp": 26, "hum": 64 },
+    { "name": "4일", "temp": 27, "hum": 63 },
+    { "name": "5일", "temp": 28, "hum": 62 },
+    { "name": "6일", "temp": 29, "hum": 61 },
+    { "name": "7일", "temp": 30, "hum": 60 }
+  ],
+  "waterLevelData": [
+    { "name": "Tank 1", "value": 60 },
+    { "name": "Tank 2", "value": 45 },
+    { "name": "Tank 3", "value": 50 },
+    { "name": "Tank 4", "value": 55 },
+    { "name": "Tank 5", "value": 65 },
+    { "name": "Tank 6", "value": 70 },
+    { "name": "Tank 7", "value": 75 }
+  ],
+  "illuminationData": [
+    { "name": "1일", "light": 400 },
+    { "name": "2일", "light": 420 },
+    { "name": "3일", "light": 440 },
+    { "name": "4일", "light": 460 },
+    { "name": "5일", "light": 480 },
+    { "name": "6일", "light": 500 },
+    { "name": "7일", "light": 520 }
+  ],
+  "tdsData": [
+    { "name": "1일", "tds": 700 },
+    { "name": "2일", "tds": 710 },
+    { "name": "3일", "tds": 720 },
+    { "name": "4일", "tds": 730 },
+    { "name": "5일", "tds": 740 },
+    { "name": "6일", "tds": 750 },
+    { "name": "7일", "tds": 760 }
+  ],
+  "liquidTempData": [
+    { "name": "1일", "temp": 18 },
+    { "name": "2일", "temp": 19 },
+    { "name": "3일", "temp": 20 },
+    { "name": "4일", "temp": 21 },
+    { "name": "5일", "temp": 22 },
+    { "name": "6일", "temp": 23 },
+    { "name": "7일", "temp": 24 }
+  ],
+  "predictionData": [
+    { "name": "1일", "water": 40, "nutrient": 30 },
+    { "name": "2일", "water": 45, "nutrient": 32 },
+    { "name": "3일", "water": 50, "nutrient": 34 },
+    { "name": "4일", "water": 55, "nutrient": 36 },
+    { "name": "5일", "water": 60, "nutrient": 38 },
+    { "name": "6일", "water": 65, "nutrient": 40 },
+    { "name": "7일", "water": 70, "nutrient": 42 }
+  ],
+  "pieData": [
+    { "name": "Water", "value": 60 },
+    { "name": "Nutrient", "value": 40 }
+  ]
+}
