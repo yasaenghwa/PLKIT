@@ -1,269 +1,82 @@
 # PLKIT-FE.dashboard
 
-This project was bootstrapped with [@enact/cli](https://github.com/enactjs/cli).
+Enact 기반의 스마트팜 대시보드로, Sandstone UI와 Node-RED를 활용하여 직관적인 UI와 실시간 데이터 모니터링 기능을 제공합니다. 각종 센서 데이터를 수집하여 스마트팜 시스템의 효율적인 관리를 돕는 한편, 사용자의 접근성을 고려하여 간편한 모듈화를 지원합니다.
 
-Below you will find some information on how to perform common tasks.
-You can find the most recent version of this guide [here](https://github.com/enactjs/templates/blob/master/packages/sandstone/template/README.md).
-Additional documentation on @enact/cli can be found [here](https://github.com/enactjs/cli/blob/master/docs/index.md).
+---
 
-## Folder Structure
+## 목차
+1. [개요](#개요)
+2. [주요 기능](#주요-기능)
+3. [구성 및 UI](#구성-및-UI)
+4. [Node-RED 데이터 흐름](#Node-RED-데이터-흐름)
+5. [통신 방식](#통신-방식)
+6. [기술 스택](#기술-스택)
 
-After creation, your project should look like this:
+---
 
-```
-my-app/
-  README.md
-  .gitignore
-  node_modules/
-  package.json
-  src/
-    App/
-      App.js
-      App.less
-      package.json
-    components/
-    views/
-      MainPanel.js
-    index.js
-    reportWebVitals.js
-  resources/
-```
+### 개요
 
-For the project to build, **these files must exist with exact filenames**:
+이 프로젝트는 스마트팜 관리의 편리성을 제공하기 위해 BLE 통신과 Wi-Fi 및 MQTT 네트워크 연결을 지원하는 모듈화된 시스템을 구축합니다. 사용자는 Enact UI를 통해 직관적으로 대시보드를 사용할 수 있으며, Node-RED를 통해 데이터 흐름을 시각화하여 실시간으로 시스템 상태를 모니터링하고 관리할 수 있습니다.
 
-- `package.json` is the core package manifest for the project
-- `src/index.js` is the JavaScript entry point.
+---
 
-You can delete or rename the other files.
+### 주요 기능
 
-You can update the `license` entry in `package.json` to match the license of your choice. For more
-information on licenses, please see the [npm documentation](https://docs.npmjs.com/files/package.json#license).
+- **Overview**  
+  스마트팜 데이터를 차트 또는 표로 시각화하여 관리할 수 있습니다. AI 기반 생장 예측 기능을 통해 작물의 생장 주기를 미리 파악하고, 스마트팜 환경을 최적화하는 데 도움을 줍니다.
 
-## Available Scripts
+- **Control**  
+  원격으로 스마트팜을 제어할 수 있는 기능을 제공합니다. WebSocket 통신을 통해 팬, 히터, LED와 같은 장치를 실시간으로 조작하여 스마트팜 환경을 조정할 수 있습니다.
 
-In the project directory, you can run:
+- **Video Streaming**  
+  원격에서 실시간으로 스마트팜의 상태를 비디오로 확인할 수 있습니다. ESP32 카메라를 활용하여 스마트팜 환경을 모니터링합니다.
 
-### `npm run serve`
+- **Flow Editor**  
+  Node-RED를 통해 데이터 흐름을 사용자가 직접 제어하고 확인할 수 있습니다. 드래그 앤 드롭 방식으로 인터페이스를 구성하여 스마트팜 데이터 흐름을 유연하게 관리할 수 있습니다.
 
-Builds and serves the app in the development mode.<br>
-Open [http://localhost:8080](http://localhost:8080) to view it in the browser.
+- **Community**  
+  사용자가 재배한 스마트팜 데이터를 공유하고 판매할 수 있는 커뮤니티 기능을 제공합니다. 스마트팜 관련 지식을 교류하고 데이터를 거래하여 스마트팜 생태계를 활성화할 수 있습니다.
 
-The page will reload if you make edits.<br>
+- **AI Chat**  
+  AI 챗봇을 통해 사용자에게 스마트팜 관리에 필요한 도움을 제공합니다. 사용자는 질문을 통해 자동화된 도움을 받을 수 있습니다.
 
-### `npm run pack` and `npm run pack-p`
+---
 
-Builds the project in the working directory. Specifically, `pack` builds in development mode with code un-minified and with debug code included, whereas `pack-p` builds in production mode, with everything minified and optimized for performance. Be sure to avoid shipping or performance testing on development mode builds.
+### 구성 및 UI
 
-### `npm run watch`
+1. **직관적인 UI**  
+   Enact 프레임워크와 Sandstone UI를 기반으로 직관적이며 사용자 친화적인 대시보드를 제공합니다. 복잡한 설정 없이 쉽게 스마트팜 시스템을 관리할 수 있습니다.
 
-Builds the project in development mode and keeps watch over the project directory. Whenever files are changed, added, or deleted, the project will automatically get rebuilt using an active shared cache to speed up the process. This is similar to the `serve` task, but without the http server.
+2. **실시간 데이터 모니터링**  
+   센서 데이터를 실시간으로 모니터링하고, 그래프 및 차트를 통해 시각적으로 표현합니다. 작물 성장 상태를 쉽게 파악하고, 필요한 조치를 신속하게 취할 수 있습니다.
 
-### `npm run clean`
+3. **실시간 영상 모니터링**  
+   스마트폰, 태블릿 등 다양한 기기를 통해 언제 어디서든 스마트팜 시스템을 원격으로 모니터링할 수 있습니다. 시간과 장소에 제약 없이 효율적인 농장 관리가 가능합니다.
 
-Deletes previous build fragments from ./dist.
+---
 
-### `npm run lint`
+### Node-RED 데이터 흐름
 
-Runs the Enact configuration of Eslint on the project for syntax analysis.
+Node-RED를 활용하여 데이터 흐름을 시각적으로 표현하고 관리합니다. 센서 데이터 수집부터 클라우드 저장, AI 분석까지 모든 과정을 직관적으로 확인할 수 있습니다.
 
-### `npm run test` and `npm run test-watch`
+- **유연한 데이터 흐름 구성**: 드래그 앤 드롭 방식의 인터페이스를 통해 데이터 흐름을 자유롭게 구성하고 수정할 수 있습니다.
+- **시스템 오류 발생 시 신속한 대응**: 실시간 데이터 흐름 모니터링을 통해 시스템 오류 발생 시 빠르게 문제 해결이 가능합니다.
 
-These tasks will execute all valid tests (files that end in `-specs.js`) that are within the project directory. The `test` is a standard single execution pass, while `test-watch` will set up a watcher to re-execute tests when files change.
+---
 
-## Enact Build Options
+### 통신 방식
 
-The @enact/cli tool will check the project's `package.json` looking for an optional `enact` object for a few customization options:
+- **데이터 통신**: 스마트팜의 데이터를 백엔드 서버와 HTTP 통신을 통해 주고받습니다. 이를 통해 시스템 상태와 AI 예측 데이터를 주기적으로 갱신하며, 효율적인 데이터 관리와 안정성을 제공합니다.
 
-- `template` _[string]_ - Filepath to an alternate HTML template to use with the [Webpack html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin).
-- `isomorphic` _[string]_ - Alternate filepath to a custom isomorphic-compatible entry point. Not needed if main entry point is already isomorphic-compatible.
-- `title` _[string]_ - Title text that should be put within the HTML's `<title></title>` tags. Note: if this is a webOS-project, the title will, by default, be auto-detected from the **appinfo.json** content.
-- `theme` _[object]_ - A simplified string name to extrapolate `fontGenerator`, `ri`, and `screenTypes` preset values from. For example, `"sandstone"`.
-- `fontGenerator` _[string]_ - Filepath to a CommonJS fontGenerator module which will build locale-specific font CSS to inject into the HTML. By default, will use any preset for a specified theme or fallback to sandstone.
-- `ri` _[object]_ - Resolution independence options to be forwarded to the [postcss-resolution-independence](https://github.com/enactjs/postcss-resolution-independence). By default, will use any preset for a specified theme or fallback to sandstone.
-  - `baseSize` _[number]_ - The root font-size to use when converting the value of the base unit to a resolution-independent unit. For example, when `baseSize` is set to 24, 48px in the LESS file will be converted to 2rem.
-- `screenTypes` _[array|string]_ - Array of 1 or more screentype definitions to be used with prerender HTML initialization. Can alternatively reference a json filepath to read for screentype definitions. By default, will use any preset for a specified theme or fallback to sandstone.
-- `nodeBuiltins` _[object]_ - Configuration settings for polyfilling NodeJS built-ins. See `node` [webpack option](https://webpack.js.org/configuration/node/).
-- `resolveFallback` _[object]_ - Configuration settings for redirecting module requests when normal resolving fails. See `resolve.fallback` [webpack option](https://webpack.js.org/configuration/resolve/#resolvefallback).
-- `deep` _[string|array]_ - 1 or more JavaScript conditions that, when met, indicate deeplinking and any prerender should be discarded.
-- `target` _[string|array]_ - A build-type generic preset string (see `target` [webpack option](https://webpack.js.org/configuration/target/)) or alternatively a specific [browserslist array](https://github.com/browserslist/browserslist) of desired targets.
-- `proxy` _[string]_ - Proxy target during project `serve` to be used within the [http-proxy-middleware](https://github.com/chimurai/http-proxy-middleware).
+- **제어 통신**: WebSocket 통신을 활용하여 스마트팜의 원격 제어를 실시간으로 처리합니다. 이를 통해 팬, 히터, LED 등의 장치를 신속하게 제어할 수 있으며, 사용자는 웹 인터페이스를 통해 직관적인 조작이 가능합니다.
 
-For example:
+---
 
-```js
-{
-  ...
-  "enact": {
-    "theme": "sandstone",
-    "resolveFallback": {
-      fs: false,
-      net: false,
-      tls: false
-    }
-  }
-  ...
-}
-```
+### 기술 스택
 
-## Displaying Lint Output in the Editor
+- **프레임워크**: Enact (Sandstone UI)
+- **데이터 흐름 관리**: Node-RED
+- **모니터링 및 제어**: 온습도 센서 (DHT22), 조도 센서 (CDS), 수온 센서, TDS 센서
 
-Some editors, including Sublime Text, Atom, and Visual Studio Code, provide plugins for ESLint.
+---
 
-They are not required for linting. You should see the linter output right in your terminal as well as the browser console. However, if you prefer the lint results to appear right in your editor, there are some extra steps you can do.
-
-You would need to install an ESLint plugin for your editor first.
-
-Ever since ESLint 6, global installs of ESLint configs are no longer supported.
-To work around this new limitation, while still supporting in-editor linting, we've created a new [eslint-config-enact-proxy](https://github.com/enactjs/eslint-config-enact-proxy) package.
-The [eslint-config-enact-proxy](https://github.com/enactjs/eslint-config-enact-proxy) acts like a small proxy config, redirecting ESLint to use a globally-installed Enact ESLint config.
-`eslint-config-enact-proxy` needs to be installed locally on a project to enable in-editor linting:
-
-```sh
-npm install --save-dev eslint-config-enact-proxy
-```
-
-Also, you need to modify `eslintConfig` property in `package.json`:
-
-```json
-  "eslintConfig": {
-    "extends": "enact-proxy"
-  },
-```
-
-> **NOTE**: For strict mode, use `"extends": "enact-proxy/strict"`.
-
-In order for in-editor linting to work with our updated ESLint config, you'll need to upgrade to ESLint 7 or later. This can be installed globally by running:
-
-```sh
-npm install -g eslint
-```
-
-Then, you will need to uninstall any previous globally-installed Enact linting package (everything but eslint itself):
-
-```sh
-npm uninstall -g eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-babel @babel/eslint-parser eslint-plugin-jest eslint-plugin-enact eslint-config-enact
-```
-
-## Installing a Dependency
-
-The generated project includes Enact (and all its libraries). It also includes React and ReactDOM. For test writing, both Jest and @testing-library/react are as development dependencies. You may install other dependencies with `npm`:
-
-```sh
-npm install --save <package-name>
-```
-
-## Importing a Component
-
-This project setup supports ES6 modules thanks to Babel.
-While you can still use `require()` and `module.exports`, we encourage you to use [`import` and `export`](http://exploringjs.com/es6/ch_modules.html) instead.
-
-For example:
-
-### `Button.js`
-
-```js
-import kind from "@enact/core/kind";
-
-const Button = kind({
-  render() {
-    // ...
-  },
-});
-
-export default Button; // Don’t forget to use export default!
-```
-
-### `DangerButton.js`
-
-```js
-import kind from "@enact/core/kind";
-import Button from "./Button"; // Import a component from another file
-
-const DangerButton = kind({
-  render(props) {
-    return <Button {...props} color="red" />;
-  },
-});
-
-export default DangerButton;
-```
-
-Be aware of the [difference between default and named exports](http://stackoverflow.com/questions/36795819/react-native-es-6-when-should-i-use-curly-braces-for-import/36796281#36796281). It is a common source of mistakes.
-
-We suggest that you stick to using default imports and exports when a module only exports a single thing (for example, a component). That’s what you get when you use `export default Button` and `import Button from './Button'`.
-
-Named exports are useful for utility modules that export several functions. A module may have at most one default export and as many named exports as you like.
-
-Learn more about ES6 modules:
-
-- [When to use the curly braces?](http://stackoverflow.com/questions/36795819/react-native-es-6-when-should-i-use-curly-braces-for-import/36796281#36796281)
-- [Exploring ES6: Modules](http://exploringjs.com/es6/ch_modules.html)
-- [Understanding ES6: Modules](https://leanpub.com/understandinges6/read#leanpub-auto-encapsulating-code-with-modules)
-
-## Adding a LESS or CSS Stylesheet
-
-This project setup uses [Webpack](https://webpack.github.io/) for handling all assets. Webpack offers a custom way of “extending” the concept of `import` beyond JavaScript. To express that a JavaScript file depends on a LESS/CSS file, you need to **import the CSS from the JavaScript file**:
-
-### `Button.less`
-
-```css
-.button {
-  padding: 20px;
-}
-```
-
-### `Button.js`
-
-```js
-import kind from '@enact/core/kind';
-import styles './Button.css'; // Tell Webpack that Button.js uses these styles
-
-const Button = kind({
-  render() {
-    // You can use them as regular CSS styles
-    return <div className={styles['button']} />;
-  }
-}
-```
-
-Upon importing a css/less files, the resulting object will be a mapping of class names from that document. This allows correct access to the class name string regardless how the build process mangles it up.
-
-In development, expressing dependencies this way allows your styles to be reloaded on the fly as you edit them. In production, all CSS files will be concatenated into a single minified `.css` file in the build output.
-
-Additionally, this system setup supports [CSS module spec](https://github.com/css-modules/css-modules) with allows for compositional CSS classes and inheritance of styles.
-
-## Adding Images and Custom Fonts
-
-With Webpack, using static assets like images and fonts works similarly to CSS.
-
-You can **`import` an image right in a JavaScript module**. This tells Webpack to include that image in the bundle. Unlike CSS imports, importing an image or a font gives you a string value. This value is the final image path you can reference in your code.
-
-Here is an example:
-
-```js
-import kind from "@enact/core/kind";
-import logo from "./logo.png"; // Tell Webpack this JS file uses this image
-
-console.log(logo); // /logo.84287d09.png
-
-const Header = kind({
-  render: function () {
-    // Import result is the URL of your image
-    return <img src={logo} alt="Logo" />;
-  },
-});
-
-export default Header;
-```
-
-This is currently required for local images. This ensures that when the project is built, webpack will correctly move the images into the build folder, and provide us with correct paths.
-
-This works in LESS/CSS too:
-
-```css
-.logo {
-  background-image: url(./logo.png);
-}
-```
-
-Webpack finds all relative module references in CSS (they start with `./`) and replaces them with the final paths from the compiled bundle. If you make a typo or accidentally delete an important file, you will see a compilation error, just like when you import a non-existent JavaScript module. The final filenames in the compiled bundle are generated by Webpack from content hashes.
