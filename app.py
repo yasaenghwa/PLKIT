@@ -1,15 +1,13 @@
 import logging
-import os
 from typing import List, Optional
+from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, Depends, status
-from fastapi.responses import PlainTextResponse
-from pydantic import BaseModel, Field, ValidationError
+from fastapi import FastAPI, HTTPException, status
+from pydantic import BaseModel, Field
 
 import openai
-from set_connection import get_api_key  # Ensure this module is available
+from set_connection import get_api_key
 
-# Initialize logging
 logging.basicConfig(
     filename='chatbot.log',
     filemode='a',
@@ -18,11 +16,9 @@ logging.basicConfig(
     encoding='utf-8'
 )
 
-# Initialize OpenAI client
 OPENAI_API_KEY = get_api_key()
 openai.api_key = OPENAI_API_KEY
 
-# Define Pydantic models
 class UserPersona(BaseModel):
     name: str = Field(..., example="스마트팜 전문가")
     age: int = Field(..., gt=0, example=40)
@@ -37,20 +33,13 @@ class ChatRequest(BaseModel):
     messages: List[dict] = Field(
         ...,
         example=[
-            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "system", "content": "당신은 조력자이며, 사용자의 문제 해결에 집중합니다. 또한 응답은 한국어로 제공됩니다."},
             {"role": "user", "content": "Hello!"},
         ]
     )
 
 class ChatResponse(BaseModel):
     response: str
-
-# Initialize FastAPI app
-app = FastAPI(
-    title="Smart Farm Chatbot API",
-    description="A FastAPI server for interacting with a Smart Farm expert chatbot.",
-    version="1.0.0"
-)
 
 def initialize_persona() -> UserPersona:
     persona = UserPersona(
@@ -92,25 +81,24 @@ def get_chat_response(messages: List[dict], model: str = "gpt-4") -> Optional[st
         logging.error(f"Unexpected error: {e}")
         return "알 수 없는 오류가 발생했습니다."
 
-@app.on_event("startup")
-def startup_event():
-    """
-    Initialize the user persona and log it at startup.
-    """
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     app.state.persona = initialize_persona()
     app.state.system_message = build_system_message(app.state.persona)
     logging.info("FastAPI server started and persona initialized.")
+    yield
+
+app = FastAPI(
+    title="Smart Farm Chatbot API",
+    description="A FastAPI server for interacting with a Smart Farm expert chatbot.",
+    version="1.0.0",
+    lifespan=lifespan
+)
 
 @app.post("/chat", response_model=ChatResponse)
 def chat_endpoint(chat_request: ChatRequest):
-    """
-    Endpoint to handle chat messages.
-
-    Expects a list of messages (including system message) and returns the assistant's response.
-    """
     messages = chat_request.messages.copy()
 
-    # Ensure the first message is the system message
     if not messages or messages[0].get("role") != "system":
         messages.insert(0, app.state.system_message)
 
@@ -118,30 +106,3 @@ def chat_endpoint(chat_request: ChatRequest):
 
     if not user_input:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="입력이 비어 있습니다. 질문을 입력해주세요.")
-
-    logging.info(f"User: {user_input}")
-
-    response = get_chat_response(messages)
-
-    if response is None:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="응답을 가져오는 중 오류가 발생했습니다.")
-
-    return ChatResponse(response=response)
-
-@app.get("/logs", response_class=PlainTextResponse)
-def get_logs():
-    """
-    Endpoint to retrieve the last 1000 characters of the chatbot log.
-    """
-    try:
-        with open('chatbot.log', 'r', encoding='utf-8') as log_file:
-            logs = log_file.read()
-        recent_logs = logs[-1000:]
-        return recent_logs
-    except Exception as e:
-        logging.error(f"Error reading logs: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="로그를 읽는 중 오류가 발생했습니다.")
-
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to the Smart Farm Chatbot API. Use /docs for API documentation."}

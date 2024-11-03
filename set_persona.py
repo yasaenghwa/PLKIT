@@ -1,11 +1,8 @@
-#set_persona.py
-
 import logging
-import os
 from typing import List, Optional
 
 from openai import OpenAI, OpenAIError
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field
 
 from set_connection import get_api_key
 
