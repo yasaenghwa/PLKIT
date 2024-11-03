@@ -9,29 +9,17 @@
 ## Table of Contents
 
 - [Overview](#overview)
-
 - [Project Structure](#project-structure)
-
 - [Features](#features)
-
 - [Getting Started](#getting-started)
-
-- [Prerequisites](#prerequisites)
-
-- [Installation](#installation)
-
-- [Running the Application](#running-the-application)
-
-- [Dependencies](#dependencies)
-
-- [Configuration](#configuration)
-
-- [CORS Settings](#cors-settings)
-
-- [Environment Variables](#environment-variables)
-
-- [Contributing](#contributing)
-
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Running the Application](#running-the-application)
+  - [Dependencies](#dependencies)
+  - [Configuration](#configuration)
+  - [CORS Settings](#cors-settings)
+  - [Environment Variables](#environment-variables)
+  - [Contributing](#contributing)
 - [License](#license)
 
 ## Overview
