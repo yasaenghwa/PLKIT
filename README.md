@@ -1,37 +1,23 @@
 # PLKIT-AI.analysis
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)
-
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.70.0-blue.svg)
 
 ## Table of Contents
 
 - [Overview](#overview)
-
 - [Project Structure](#project-structure)
-
 - [Features](#features)
-
 - [Getting Started](#getting-started)
-
 - [Prerequisites](#prerequisites)
-
 - [Installation](#installation)
-
 - [Running the Application](#running-the-application)
-
 - [Dependencies](#dependencies)
-
 - [Configuration](#configuration)
-
 - [CORS Settings](#cors-settings)
-
 - [Environment Variables](#environment-variables)
-
 - [Contributing](#contributing)
-
 - [License](#license)
 
 ## Overview
