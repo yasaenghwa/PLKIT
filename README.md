@@ -22,15 +22,7 @@ PLKIT-AI.chat is a chatbot application that emulates a **Smart Farm Expert**. Bu
 
 ## Project Structure
 
-PLKIT-AI.chat/
-├── app.py # FastAPI application main file
-├── set_persona.py # User persona setup and chatbot logic
-├── set_connection.py # OpenAI API key configuration
-├── requirements.txt # Project dependencies list
-├── Dockerfile # Docker image build file
-├── chatbot.log # Application log file
-├── README.md # Project documentation
-└── .gitignore # Git ignore file
+PLKIT-AI.chat/ ├── app.py # FastAPI application main file ├── set_persona.py # User persona setup and chatbot logic ├── set_connection.py # OpenAI API key configuration ├── requirements.txt # Project dependencies list ├── Dockerfile # Docker image build file ├── chatbot.log # Application log file ├── README.md # Project documentation └── .gitignore # Git ignore file
 
 ## Features
 
