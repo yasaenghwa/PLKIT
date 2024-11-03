@@ -19,7 +19,7 @@
   - [Configuration](#configuration)
   - [CORS Settings](#cors-settings)
   - [Environment Variables](#environment-variables)
-  - [Contributing](#contributing)
+- [Contributing](#contributing)
 - [License](#license)
 
 ## Overview
