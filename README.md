@@ -24,6 +24,8 @@
 
 ## Overview
 
+![Full Analysis](full_analysis.png)
+
 **PLKIT-AI.analysis** is a FastAPI-based application designed for managing and deploying time series forecasting models using TSMixer. It provides functionalities to upload, manage, and perform predictions with TSMixer models, specifically tailored for single data point predictions. The application ensures secure cross-origin requests and maintains robust logging for monitoring and debugging purposes.
 
 ## Project Structure
