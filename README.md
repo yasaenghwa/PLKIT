@@ -230,7 +230,8 @@ git checkout -b feature/your-feature-name
 ```
 
 4. **Make Your Changes**
-   Implement your feature or bug fix.
+
+Implement your feature or bug fix.
 
 5. **Commit Your Changes**
 
