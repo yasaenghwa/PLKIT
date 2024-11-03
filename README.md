@@ -18,6 +18,7 @@
 
 ## Overview
 
+![Full chat](full_chat.png)
 PLKIT-AI.chat is a chatbot application that emulates a **Smart Farm Expert**. Built on FastAPI, this application leverages OpenAI's GPT-4 API to facilitate natural and engaging conversations with users. By setting up user personas, the chatbot provides professional responses tailored to specific fields. Additionally, it manages conversation logs for future analysis and monitoring. Designed for seamless deployment, PLKIT-AI.chat can be easily hosted on cloud services such as AWS EC2.
 
 ## Project Structure
