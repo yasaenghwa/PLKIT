@@ -1,7 +1,3 @@
-markdown
-
-코드 복사
-
 # PLKIT-AI.analysis
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
@@ -44,6 +40,7 @@ markdown
 
 ## Project Structure
 
+```
 PLKIT-AI.analysis/
 ├── app/
 │ ├── init.py
@@ -71,6 +68,7 @@ PLKIT-AI.analysis/
 ├── .env
 ├── README.md
 └── LICENSE
+```
 
 - **app/**: Contains the main application code.
 
