@@ -7,8 +7,8 @@ Enact 기반의 스마트팜 대시보드로, Sandstone UI와 Node-RED를 활용
 ## 목차
 1. [개요](#개요)
 2. [주요 기능](#주요-기능)
-3. [구성 및 UI](#구성-및-UI)
-4. [Node-RED 데이터 흐름](#Node-RED-데이터-흐름)
+3. [구성 및 UI](#구성-및-ui)
+4. [Node-RED 데이터 흐름](#node-red-데이터-흐름)
 5. [통신 방식](#통신-방식)
 6. [기술 스택](#기술-스택)
 
@@ -45,7 +45,7 @@ Enact 기반의 스마트팜 대시보드로, Sandstone UI와 Node-RED를 활용
 ### 구성 및 UI
 
 1. **Overview**
-    ![Overview](Enact_Overview.png)  
+    ![Overview](https://github.com/user-attachments/assets/e496240b-60d2-43cd-959c-f6504b866978)  
    - **설명**: 센서 데이터를 실시간으로 모니터링하고, 그래프 및 차트를 통해 시각적으로 표현합니다. 스마트팜의 상태를 한눈에 파악하고, 필요한 조치를 신속하게 취할 수 있습니다.
    - **구성 요소**:
      - **Farm Air Temperature and Humidity**: 온도 및 습도를 모니터링하여 작물 생육 상태를 체크합니다.
@@ -54,34 +54,35 @@ Enact 기반의 스마트팜 대시보드로, Sandstone UI와 Node-RED를 활용
      - **AI 예측 데이터**: Water vs Nutrient 차트를 통해 AI 예측값을 반영하여 자원의 적절한 사용 시기를 파악할 수 있습니다.
 
 2. **Control**
-    ![Control](Enact_Control.png)  
+    ![Control](https://github.com/user-attachments/assets/db0d3829-4663-4cd8-8b6a-99b6ea4de6e4)  
    - **설명**: 각 모듈을 원격으로 제어할 수 있는 기능을 제공합니다. MQTT 프로토콜을 통해 센서로부터 실시간 데이터를 수신하여 UI에 즉각 반영됩니다.
    - **구성 요소**:
      - **Fan/Heater/LED Light**: 스위치를 통해 각 장치를 온오프 할 수 있습니다.
      - **Pump**: 슬라이드와 버튼을 통해 물의 레벨을 조절하고, 각 탱크를 관리할 수 있습니다.
 
 3. **Community**
-    ![Community](Enact_Community.png)  
+    ![Community](https://github.com/user-attachments/assets/60de29d2-521d-4840-840f-c2d7490176c6)  
    - **설명**: 스마트팜 데이터를 공유하고 판매할 수 있는 커뮤니티 기능을 제공합니다. 스마트팜 관련 지식과 데이터를 교류하며 스마트팜 생태계를 구축합니다.
    - **주요 기능**:
      - **데이터 거래**: 스마트팜에서 모은 데이터를 거래하여 사용자 간의 생태계 활성화.
      - **지식 교류**: 스마트팜 운영에 필요한 정보 공유.
 
 4. **AI Chat**
-    ![AI Chat - Flow Editor](Enact_Ai\ chat.png) ![AI Chat - Interaction](Enact_Ai\ chatting.png)  
+    ![AI Chat - Flow Editor](https://github.com/user-attachments/assets/425feb75-8934-4456-bbc9-5369288af9fe)  
+    ![AI Chat - Interaction](https://github.com/user-attachments/assets/626dd464-740a-42c6-8ddc-7c12836ed95d)  
    - **설명**: AI 챗봇을 통해 스마트팜 관리와 관련된 도움을 사용자에게 제공합니다.
    - **주요 기능**:
      - **상담 자동화**: 사용자가 질문을 하면 자동으로 답변을 제공, 스마트팜 운영에 필요한 정보를 빠르게 습득.
      - **데이터 기반 상담**: 각종 데이터를 기반으로 작물 관리에 필요한 실질적인 조언을 제공합니다.
 
 5. **Video Streaming**
-    ![Video Streaming](image.png)  
+    ![Video Streaming](https://github.com/user-attachments/assets/eef9af7e-bb2d-4b16-af2c-4d74a25b1b75)  
    - **설명**: ESP32 카메라를 활용하여 스마트팜을 실시간으로 원격 모니터링합니다.
    - **주요 기능**:
      - **실시간 영상 스트리밍**: 사용자가 언제 어디서나 스마트팜의 상태를 확인할 수 있도록 비디오 스트리밍을 지원합니다.
   
 6. **Node-RED 데이터 흐름**
-    ![Node-RED 데이터 흐름](image.png)  
+    ![Node-RED 데이터 흐름](https://github.com/user-attachments/assets/1b7b692e-a25c-4e57-99a2-5f65099e648d)  
    - **설명**: Node-RED를 활용하여 데이터 흐름을 시각적으로 표현하고 관리합니다. 센서 데이터 수집부터 클라우드 저장, 그리고 AI 분석까지 모든 과정을 직관적으로 확인할 수 있습니다.
    - **주요 기능**:
      - **드래그 앤 드롭 인터페이스**: 간편한 인터페이스를 통해 데이터 흐름을 자유롭게 구성 및 수정 가능.
