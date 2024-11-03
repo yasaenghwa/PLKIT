@@ -1,9 +1,7 @@
 # PLKIT-AI.analysis
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)
-
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.70.0-blue.svg)
 
 ## Table of Contents
