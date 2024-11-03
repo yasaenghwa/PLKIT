@@ -1,5 +1,3 @@
-# data/upload_to_mongodb.py
-
 import logging
 import os
 

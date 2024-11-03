@@ -1,11 +1,5 @@
-# app/model.py
-
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.linear_model import LinearRegression
-from xgboost import XGBRegressor
 from darts.models import TSMixerModel as TSMixer
 from darts import TimeSeries
-import joblib
 
 class BaseModel:
     def train(self, X, y):
@@ -20,7 +14,6 @@ class BaseModel:
     def load(self, filepath):
         raise NotImplementedError
 
-# TSMixer 정의 (Darts의 TSMixer 사용)
 class TSMixerModel(BaseModel):
     def __init__(self, input_chunk_length=24, output_chunk_length=12, n_epochs=300, model_kwargs=None):
         if model_kwargs is None:

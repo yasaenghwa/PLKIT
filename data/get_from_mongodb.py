@@ -1,5 +1,3 @@
-# data/get_from_mongodb.py
-
 import logging
 import os
 import pandas as pd
@@ -16,7 +14,6 @@ def get_data_from_db() -> pd.DataFrame:
         db = client[MONGO_DB]
         collection = db[SYNTHETIC_COLLECTION]
 
-        # 필요한 필드만 가져오기
         fields = {
             "_id": 0,
             "timestamp": 1,
@@ -26,7 +23,6 @@ def get_data_from_db() -> pd.DataFrame:
         }
         data = list(collection.find({}, fields))
 
-        # 데이터프레임으로 변환
         df = pd.DataFrame(data)
         df['timestamp'] = pd.to_datetime(df['timestamp'], format='%Y.%m.%d %H:%M')
         df.set_index('timestamp', inplace=True)

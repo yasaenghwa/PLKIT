@@ -1,12 +1,9 @@
-# data/mongo_utils.py
-
 import os
 import logging
 from pymongo import MongoClient
 from pymongo.errors import ConfigurationError, ConnectionFailure
 from dotenv import load_dotenv
 
-# .env 파일 로드
 load_dotenv()
 
 def get_mongo_client():
@@ -21,9 +18,8 @@ def get_mongo_client():
     try:
         client = MongoClient(
             uri,
-            serverSelectionTimeoutMS=5000,  # 5초 타임아웃
+            serverSelectionTimeoutMS=5000, 
         )
-        # 연결 확인
         client.admin.command("ping")
         logging.info("MongoDB에 성공적으로 연결되었습니다.")
         return client

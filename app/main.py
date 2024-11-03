@@ -1,40 +1,28 @@
-# app/main.py
-
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Optional, Dict
+from typing import List, Optional
 import os
 import json
 from app.model_manager import ModelManager
-from app.schemas import (
-    ModelUploadResponse,
-    PredictRequest,
-    PredictResponse
-)
+from app.schemas import ModelUploadResponse, PredictRequest, PredictResponse
 from darts import TimeSeries
 import pandas as pd
 import logging
-
-# 설정 파일에서 CORS_ORIGINS 가져오기
 from app.config import CORS_ORIGINS
 
 app = FastAPI(title="ML Model API")
 
-# CORS 설정
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=CORS_ORIGINS,     # config.py에서 가져온 origins 사용
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 모델이 저장될 디렉토리
 MODEL_DIR = "models"
 os.makedirs(MODEL_DIR, exist_ok=True)
 
-# 로깅 설정
 logging.basicConfig(
     filename='server.log',
     filemode='a',
@@ -43,7 +31,6 @@ logging.basicConfig(
     encoding='utf-8'
 )
 
-# 모델 관리자 인스턴스 생성
 model_manager = ModelManager(models_dir=MODEL_DIR)
 
 @app.post("/upload-model/", response_model=ModelUploadResponse)
@@ -52,122 +39,94 @@ async def upload_model(
     model_type: str = Form(...),
     model_kwargs: Optional[str] = Form(None)
 ):
-    """
-    모델을 업로드하고 로드합니다.
-    - `model_type`: 모델 유형 (TSMixer)
-    - `model_kwargs`: TSMixer 모델에 필요한 추가 인자 (JSON 형식 문자열)
-    """
-
     logging.info(f"Received upload request: {file.filename}, type: {model_type}")
 
-    # 파일 이름 검증
     if not file.filename.endswith(".pt"):
-        logging.error(f"업로드된 파일의 확장자가 유효하지 않습니다: {file.filename}")
+        logging.error(f"Invalid file extension: {file.filename}")
         raise HTTPException(status_code=400, detail="Only .pt files are allowed for TSMixer.")
 
     model_name, ext = os.path.splitext(file.filename)
 
-    # 모델 유형과 파일 확장자 일치 확인
     if model_type != "TSMixer" or ext != ".pt":
-        logging.error(f"모델 유형과 파일 확장자가 일치하지 않습니다: {model_type}, {ext}")
+        logging.error(f"Model type and file extension mismatch: {model_type}, {ext}")
         raise HTTPException(status_code=400, detail="Model type and file extension do not match. Only TSMixer with .pt files are allowed.")
 
     file_path = os.path.join(MODEL_DIR, file.filename)
 
-    # 파일 저장
     try:
         with open(file_path, "wb") as f:
             content = await file.read()
             f.write(content)
-        logging.info(f"파일 저장 완료: {file_path}")
+        logging.info(f"File saved: {file_path}")
     except Exception as e:
-        logging.error(f"파일 저장 실패: {e}")
+        logging.error(f"File save failed: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to save file: {e}")
 
-    # 모델 인자 처리
     kwargs = None
     if model_kwargs:
         try:
             kwargs = json.loads(model_kwargs)
-            logging.info(f"모델 인자: {kwargs}")
+            logging.info(f"Model arguments: {kwargs}")
         except json.JSONDecodeError:
-            logging.error("model_kwargs가 유효한 JSON 형식이 아닙니다.")
+            logging.error("Invalid JSON format in model_kwargs.")
             raise HTTPException(status_code=400, detail="model_kwargs must be a valid JSON string.")
 
-    # 모델 로드
     try:
         model_manager.load_model(model_name, file_path, model_type, model_kwargs=kwargs)
-        logging.info(f"모델 로드 완료: {model_name}")
+        logging.info(f"Model loaded: {model_name}")
     except ValueError as ve:
-        logging.error(f"모델 로드 오류: {ve}")
+        logging.error(f"Model load error: {ve}")
         raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
-        logging.error(f"모델 로드 실패: {e}")
+        logging.error(f"Model load failed: {e}")
         raise HTTPException(status_code=500, detail=f"Error loading model: {e}")
 
     return ModelUploadResponse(model_name=model_name, message="Model uploaded and loaded successfully.")
 
 @app.get("/models/", response_model=List[str])
 def list_models():
-    """
-    로드된 모든 모델의 이름을 반환합니다.
-    """
     models = model_manager.list_models()
-    logging.info(f"로드된 모델 목록 조회: {models}")
+    logging.info(f"Loaded models list: {models}")
     return models
 
 @app.post("/predict/", response_model=PredictResponse)
 def predict(request: PredictRequest):
-    """
-    모델을 사용하여 예측을 수행합니다.
-    - `model_name`: 사용할 모델의 이름 (TSMixer_타겟명)
-    - `series`: TSMixer 모델용 시계열 데이터
-    """
-    logging.info(f"예측 요청: {request.model_name}")
+    logging.info(f"Prediction request: {request.model_name}")
 
     try:
         series_predictions = {}
 
-        # TSMixer 모델 예측 처리
         if request.series:
-            # 시계열 데이터 처리
             time_index = request.series.get("time_index")
             values = request.series.get("values")
 
             if not time_index or not values:
-                logging.error("시리즈 데이터에 'time_index' 또는 'values'가 없습니다.")
-                raise ValueError("`time_index`와 `values`는 시리즈 데이터에 필수적입니다.")
+                logging.error("Missing 'time_index' or 'values' in series data.")
+                raise ValueError("`time_index` and `values` are required in series data.")
 
-            # 시리즈 데이터 변환
             try:
-                # 데이터 포인트 수에 따라 빈도 설정
                 if len(time_index) == 1:
-                    # 단일 데이터 포인트인 경우, 빈도를 'H' (시간별)로 설정 (필요에 따라 변경 가능)
                     series = TimeSeries.from_times_and_values(pd.to_datetime(time_index), values, freq='H')
-                    logging.info("단일 데이터 포인트의 빈도를 'H'로 설정했습니다.")
+                    logging.info("Single data point, frequency set to 'H'.")
                 else:
-                    # 여러 데이터 포인트인 경우, 빈도를 추론
                     inferred_freq = pd.infer_freq(pd.to_datetime(time_index))
                     if inferred_freq:
                         series = TimeSeries.from_times_and_values(pd.to_datetime(time_index), values, freq=inferred_freq)
-                        logging.info(f"시계열 데이터의 빈도를 추론했습니다: {inferred_freq}")
+                        logging.info(f"Inferred frequency: {inferred_freq}")
                     else:
-                        logging.error("시계열 데이터의 빈도를 추론할 수 없습니다.")
+                        logging.error("Cannot infer frequency.")
                         raise ValueError("Cannot infer frequency. Please ensure consistent time intervals or provide multiple data points.")
             except Exception as e:
-                logging.error(f"시계열 데이터 변환 오류: {e}")
+                logging.error(f"Time series conversion error: {e}")
                 raise HTTPException(status_code=400, detail=f"Invalid `series` format: {e}")
 
-            # 모델 이름이 TSMixer로 시작하는지 확인
             if not request.model_name.startswith("TSMixer"):
-                logging.error("TSMixer 모델만 지원됩니다.")
-                raise ValueError("TSMixer 모델만 지원됩니다.")
+                logging.error("Only TSMixer models are supported.")
+                raise ValueError("Only TSMixer models are supported.")
 
-            # 예측 수행
             prediction_series = model_manager.predict(request.model_name, series, n=1)
-            logging.info(f"TSMixer 예측 결과: {prediction_series}")
+            logging.info(f"TSMixer prediction result: {prediction_series}")
 
-            # 예측 결과 변환
             prediction = {
                 "time_index": prediction_series.time_index.tolist(),
                 "values": prediction_series.values().tolist()
@@ -175,16 +134,16 @@ def predict(request: PredictRequest):
             series_predictions["series_prediction"] = prediction
 
         if not series_predictions:
-            logging.error("TSMixer 모델 예측을 위한 시리즈 데이터가 제공되지 않았습니다.")
-            raise ValueError("TSMixer 모델 예측을 위한 시리즈 데이터가 제공되지 않았습니다.")
+            logging.error("No series data provided for TSMixer model prediction.")
+            raise ValueError("Series data is required for TSMixer model prediction.")
 
         return PredictResponse(
             series_prediction=series_predictions if series_predictions else None
         )
 
     except ValueError as ve:
-        logging.error(f"예측 중 오류 발생: {ve}")
+        logging.error(f"Prediction error: {ve}")
         raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
-        logging.error(f"예측 수행 중 오류 발생: {e}")
+        logging.error(f"Error during prediction: {e}")
         raise HTTPException(status_code=500, detail=f"Prediction error: {e}")
