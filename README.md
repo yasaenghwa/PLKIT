@@ -28,9 +28,9 @@ PLKIT-AI.chat/
 ├── set_persona.py # User persona setup and chatbot logic
 ├── set_connection.py # OpenAI API key configuration
 ├── requirements.txt # Project dependencies list
-├── Dockerfile # Docker image build file
 ├── chatbot.log # Application log file
 ├── README.md # Project documentation
+├── config.conf # configuration file
 └── .gitignore # Git ignore file
 ```
 
