@@ -84,7 +84,7 @@ Enact 기반의 스마트팜 대시보드로, Sandstone UI와 Node-RED를 활용
      - **실시간 영상 스트리밍**: 사용자가 언제 어디서나 스마트팜의 상태를 확인할 수 있도록 비디오 스트리밍을 지원합니다.
   
 6. **Node-RED 데이터 흐름**
-   ![Enact_nodeRed](https://github.com/user-attachments/assets/cf4db2d3-5882-4ca8-97f2-22602a8f01cc)
+   ![image](https://github.com/user-attachments/assets/d34ddb58-7d37-4d2d-83e9-ff1895bb4262)
    - **설명**: Node-RED를 활용하여 데이터 흐름을 시각적으로 표현하고 관리합니다. 센서 데이터 수집부터 클라우드 저장, 그리고 AI 분석까지 모든 과정을 직관적으로 확인할 수 있습니다.
    - **주요 기능**:
      - **드래그 앤 드롭 인터페이스**: 간편한 인터페이스를 통해 데이터 흐름을 자유롭게 구성 및 수정 가능.
