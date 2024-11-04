@@ -1,0 +1,10 @@
+{
+  "id": "com.plkit.app",
+  "version": "0.0.5",
+  "vendor": "PLKIT",
+  "type": "web",
+  "main": "index.html",
+  "title": "dashboard",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png"
+}

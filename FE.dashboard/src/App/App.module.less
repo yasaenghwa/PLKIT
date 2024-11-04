@@ -1,0 +1,475 @@
+.body {
+  font-family: Arial, sans-serif;
+  background-color: #1f1f1f;
+  color: #ffffff;
+  margin: 0;
+  padding: 0;
+}
+
+/* App.module.less */
+.scrollContainer {
+  height: 100vh; /* 전체 화면 높이로 설정 */
+  overflow-y: visible; /* 세로 스크롤 활성화 */
+}
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dashboard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px;
+}
+
+.card {
+  background-color: #2c2c2c;
+  border-radius: 10px;
+  padding: 20px;
+  flex: 1 1 calc(33% - 40px);
+  min-width: 300px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.card h3 {
+  margin-top: 0;
+}
+
+.control {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px;
+}
+
+.controlCard {
+  background-color: #2c2c2c;
+  border-radius: 10px;
+  padding: 20px;
+  flex: 1;
+  min-width: 150px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.controlCard h3 {
+  margin-top: 0;
+}
+
+.switches {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.switch label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  cursor: pointer;
+}
+
+.checkbox {
+  display: none;
+}
+
+.slider {
+  width: 60px;
+  height: 30px;
+  background-color: lightgray;
+  border-radius: 20px;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  border: 4px solid transparent;
+  transition: 0.3s;
+  box-shadow: 0 0 10px 0 rgb(0, 0, 0, 0.25) inset;
+  cursor: pointer;
+}
+
+.slider::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  transform: translateX(-30px);
+  border-radius: 20px;
+  transition: 0.3s;
+  box-shadow: 0 0 10px 3px rgb(0, 0, 0, 0.25);
+}
+
+.checkbox:checked + .slider {
+  background-color: #66bb6a;
+}
+
+.checkbox:checked + .slider::before {
+  transform: translateX(30px);
+  box-shadow: 0 0 10px 3px rgb(0, 0, 0, 0.25);
+}
+
+.checkbox:active + .slider::before {
+  transform: translate(0);
+}
+
+.sliderContainer {
+  display: flex;
+  flex-direction: column;
+  background-color: #2c2c2c;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  flex: 2;
+}
+
+.slider-container h3 {
+  margin-top: 0;
+  text-align: center;
+}
+
+.slider-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.slider-container select {
+  padding: 5px;
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 5px;
+}
+
+.slider-container input[type="range"] {
+  flex-grow: 1;
+  margin: 0 10px;
+  accent-color: #ff8c00;
+}
+
+.waterLevel {
+  padding: 20px;
+}
+
+.waterLevelItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.progress-bar:hover .tooltip {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.tooltip {
+  visibility: hidden;
+  opacity: 0;
+  width: 120px;
+  background-color: rgba(0, 0, 0, 0.75);
+  color: #ffffff;
+  text-align: center;
+  border-radius: 5px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1000;
+  top: -125%; /* top으로 위치 변경 */
+  left: 50%;
+  margin-left: -60px;
+  transition: opacity 0.3s;
+}
+
+.tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%; /* 아래쪽에 화살표 */
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+.progressBar {
+  width: 60%;
+  background-color: #333;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 10px;
+  margin: 0 10px;
+  position: relative; /* 툴팁 위치를 기준으로 삼기 위해 상대 위치 사용 */
+}
+
+.progressFill {
+  height: 100%;
+  background-color: #00c49f;
+  transition: width 0.5s ease-in-out;
+  border-radius: 10px;
+}
+
+.waterLevelItem span {
+  width: 20%; /* 왼쪽과 오른쪽 텍스트의 너비를 일정하게 유지 */
+  text-align: left; /* 왼쪽 텍스트 정렬 */
+}
+
+.waterLevelItem span:last-child {
+  text-align: right; /* 오른쪽 텍스트 정렬 */
+  width: auto;
+  white-space: nowrap;
+  margin-left: 10px;
+}
+
+/* Input field styling */
+.controlCard input[type="number"] {
+  background-color: #333;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  padding: 10px;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 15px;
+}
+
+/* Water level buttons */
+.level-buttons button {
+  background-color: #444;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  padding: 10px;
+  width: 22%;
+  margin: 5px 0;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.level-buttons button:hover {
+  background-color: #00c49f;
+}
+
+/* Display water level percentage */
+.controlCard p {
+  font-size: 16px;
+  color: #fff;
+  margin-top: 15px;
+}
+
+/* Tooltip on hover */
+.tooltip {
+  visibility: hidden;
+  opacity: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  color: #ffffff;
+  text-align: center;
+  border-radius: 5px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: opacity 0.3s;
+}
+
+.level-buttons button:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Add hover effect for level buttons */
+.level-buttons button:hover {
+  background-color: #00c49f;
+}
+
+input[type="range"] {
+  width: 100%;
+}
+
+.controlGridLayout {
+  display: grid;
+  grid-template-columns: 1fr 2fr; /* 왼쪽 1칸, 오른쪽 2칸 */
+  grid-gap: 20px;
+}
+
+.controlLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.controlRight {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* pump와 water level을 같은 행에 배치 */
+  grid-gap: 20px;
+}
+
+.chart-container {
+  width: 100%;
+  overflow-x: scroll; /* 가로 스크롤 활성화 */
+}
+
+.chart-content {
+  width: 1500px; /* 차트의 실제 너비를 넓게 설정 */
+  height: 200px; /* 차트 높이 */
+}
+
+/* Control.module.css */
+
+.controlGridLayout {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 20px;
+}
+
+.controlLeft,
+.controlRight {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sliderContainer {
+  background-color: #2c2c2c;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.textSection {
+  width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  font-size: 20px;
+  color: #fff;
+}
+
+.textSection p {
+  margin: 10px 0;
+}
+
+.textSection span {
+  background-color: #00c49f;
+  color: #fff;
+  padding: 0 8px;
+  border-radius: 5px;
+  margin: 0 5px;
+}
+
+.nutrientSpan {
+  background-color: #ffbb28;
+}
+
+.recycleSpan {
+  background-color: #00c49f;
+}
+
+.divider {
+  height: 1px;
+  background-color: #ccc;
+  margin: 20px 0;
+}
+
+.container {
+  position: relative;
+  width: 340px;
+  height: 540px;
+  border-radius: 15px;
+  box-shadow: 1px 1px 10px #333333;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+/* 다른 스타일들도 추가 */
+.chartWrapper {
+  overflow-x: auto; /* 스크롤을 강제 적용 */
+  width: 100%;
+  white-space: nowrap; /* 차트가 가로로 길게 표시되도록 설정 */
+}
+
+.largeChart {
+  width: auto; /* 자동으로 차트의 폭이 설정되도록 */
+}
+
+.scrollContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.navBar {
+  width: 360px; /* 이미 설정된 폭 */
+  height: 100%;
+  background-color: #f5f5f5;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  padding: 40px 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0; /* Nav 바의 크기가 줄어들지 않도록 설정 */
+}
+
+.contentArea {
+  flex: 1;
+  overflow-y: auto;
+
+  position: relative;
+}
+
+.logoContainer {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.logo {
+  width: 90%; /* 로고 크기 증가 */
+  height: auto;
+}
+
+.navButton {
+  display: block;
+  padding: 20px 30px; /* 버튼 패딩을 증가 */
+  color: #333;
+  background-color: #fff;
+  border-radius: 8px;
+  text-align: center;
+  text-decoration: none;
+  width: 100%;
+  font-size: 40px; /* 글꼴 크기 증가 */
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.navButton:hover {
+  background-color: #ddd;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2); /* 호버시 은은한 그림자 효과 */
+}
+
+p {
+  font-size: 40px; /* 원하는 크기로 설정 */
+  text-align: center;
+}
+
+.waterLevelText {
+  font-size: 70px !important; /* 원하는 크기 */
+  text-align: center !important; /* 텍스트 가운데 정렬 */
+}
