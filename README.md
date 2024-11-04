@@ -13,7 +13,6 @@
 - **[BE.platform README](./BE.platform/README.md)**: Backend service documentation for the community and market platform.
 - **[EM.modules README](./EM.modules/README.md)**: Overview of embedded modules for smart farm control using BLE.
 - **[FE.dashboard README](./FE.dashboard/README.md)**: Frontend dashboard documentation built on Enact and Node-RED for smart farm management.
-- **[FE.library README](./FE.library/README.md)**: Information on the component library for building UI elements in the frontend.
 - **[FE.web README](./FE.web/README.md)**: Web platform documentation for data sharing and community features.
 
 
