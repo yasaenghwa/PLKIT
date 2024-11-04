@@ -1,2 +1,0 @@
-# .docs
-Documents for Yasaenghwa
