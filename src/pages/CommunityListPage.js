@@ -36,7 +36,7 @@ function CommunityItem({ community, onDelete, onEdit }) {
       </div>
       <div className={styles.writer}>
         <Avatar
-          src={community.writer?.profile?.photo || "default_avatar.svg"}
+          src={community.writer?.profile?.photo || "default-avatar.svg"}
           alt={community.writer?.name || "작성자"}
           className={styles.avatar}
         />
