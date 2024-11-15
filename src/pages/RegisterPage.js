@@ -68,15 +68,7 @@ function RegisterPage() {
   return (
     <>
       <h1 className={styles.Heading}>회원가입</h1>
-      <LogButton
-        className={styles.GoogleLogButton}
-        type="button"
-        appearance="outline"
-      >
-        <img src={GoogleImage} alt="Google" />
-        구글로 시작하기
-      </LogButton>
-      <HorizontalRule className={styles.HorizontalRule}>또는</HorizontalRule>
+
       <form className={styles.Form} onSubmit={handleSubmit}>
         <Label className={styles.Label} htmlFor="name">
           이름

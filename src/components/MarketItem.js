@@ -15,7 +15,7 @@ function MarketItem({ market, onDelete, onEdit }) {
     <Card className={styles.marketItem}>
       <div className={styles.thumb}>
         {market.image ? (
-          <img src={market.image} alt="이미지" className={styles.image} />
+          <img src={`${BASE_URL}/${market.image}`} alt="이미지" className={styles.image} />
         ) : (
           <div className={styles.noImage}>이미지 없음</div>
         )}

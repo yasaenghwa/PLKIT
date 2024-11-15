@@ -39,6 +39,7 @@ function MarketListPage() {
   async function fetchMarketPosts() {
     try {
       const posts = await getMarkets(keyword); // API 호출
+      console.log("API에서 가져온 마켓 데이터:", posts); // 데이터 구조 확인
       setMarketPosts(posts); // 상태에 API 응답 데이터 설정
     } catch (error) {
       console.error("마켓 게시물 가져오기 오류:", error);

@@ -5,56 +5,47 @@ import axios from "axios";
 import "../axiosConfig"; // axios 설정 파일을 import하여 인터셉터 설정 적용
 const BASE_URL = process.env.REACT_APP_BASE_URL; // .env에서 가져온 서버 URL
 
-// 1. 커뮤니티 게시물 이미지 업로드 함수
+//console.log("JWT Token:", localStorage.getItem("accessToken"));
+
+// 4. 커뮤니티 게시글 이미지 업로드 함수
 export async function uploadCommunityImage(communityId, file) {
-  console.log("communityId:", communityId); // communityId가 제대로 전달되는지 확인
-
-  if (!communityId) {
-    console.error("communityId가 유효하지 않습니다.");
-    return null; // communityId가 없을 경우 요청하지 않음
-  }
-
   const formData = new FormData();
-  formData.append("file", file); // 선택된 파일을 formData에 추가
+  formData.append("file", file); // 파일을 FormData에 추가
 
   try {
-    // community_id에 맞춰 이미지 업로드 요청
     const response = await axios.post(
       `${BASE_URL}/communities/${communityId}/image`,
       formData,
       {
         headers: {
           "Content-Type": "multipart/form-data",
-          accept: "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
       }
     );
-    return response.data; // 서버에서 반환된 파일명 데이터
+    return response.data; // 업로드된 이미지 정보 반환
   } catch (error) {
-    console.error("커뮤니티 게시물 이미지 업로드 오류:", error);
+    console.error("커뮤니티 이미지 업로드 오류:", error);
     return null;
   }
 }
 
-// 2. 커뮤니티 게시물 이미지 조회 함수
+// 5. 커뮤니티 게시글 이미지 조회 함수
 export async function fetchCommunityImage(communityId) {
   try {
     const response = await axios.get(
       `${BASE_URL}/communities/${communityId}/image`,
       {
-        headers: { accept: "*/*" },
-        responseType: "blob", // 이미지 데이터를 binary로 받아오기 위해 responseType을 blob으로 설정
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        responseType: "blob", // 이미지 데이터를 blob으로 받아옴
       }
     );
-    return URL.createObjectURL(response.data); // Blob 객체를 URL로 변환하여 반환
+    return URL.createObjectURL(response.data); // Blob 데이터를 URL로 변환하여 반환
   } catch (error) {
-    if (error.response && error.response.status === 404) {
-      console.warn("이미지를 찾을 수 없습니다.");
-      return null; // 이미지가 없으면 null을 반환
-    } else {
-      console.error("커뮤니티 게시물 이미지 조회 오류:", error);
-      throw error;
-    }
+    console.error("커뮤니티 이미지 조회 오류:", error);
+    return null;
   }
 }
 
@@ -82,58 +73,67 @@ export async function getCommunityById(communityId) {
   }
 }
 
-// 3. 새로운 커뮤니티 게시글 추가 함수 (JSON 형식으로 POST 요청)
+// 1. 새로운 커뮤니티 게시글 추가 함수
 export async function addCommunity({ title, content, writer_id }) {
   try {
     const response = await axios.post(
-      `${BASE_URL}/communities`,
+      `${BASE_URL}/communities/`,
       {
         title,
         content,
-        writer_id,
+        writer_id, // 사용자 ID 전달
       },
       {
         headers: {
           "Content-Type": "application/json",
-          accept: "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`, // JWT 토큰으로 인증
         },
       }
     );
-    console.log("addCommunity - response.data:", response.data); // response.data 확인
-    return response.data;
+    return response.data; // 생성된 게시글 데이터 반환
   } catch (error) {
     console.error("커뮤니티 게시글 추가 오류:", error);
     return null;
   }
 }
 
-// 4. 커뮤니티 게시글 삭제 (API 요청으로 변경)
+// 2. 커뮤니티 게시글 수정 함수
+export async function updateCommunity(communityId, { title, content }) {
+  try {
+    const response = await axios.patch(
+      `${BASE_URL}/communities/${communityId}`,
+      {
+        title,
+        content,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      }
+    );
+    return response.data; // 수정된 게시글 데이터 반환
+  } catch (error) {
+    console.error("커뮤니티 게시글 수정 오류:", error);
+    return null;
+  }
+}
+
+// 3. 커뮤니티 게시글 삭제 함수
 export async function deleteCommunity(communityId) {
   try {
-    await axios.delete(`${BASE_URL}/communities/${communityId}`);
-    return true;
+    await axios.delete(`${BASE_URL}/communities/${communityId}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+    });
+    return true; // 성공 시 true 반환
   } catch (error) {
     console.error("커뮤니티 게시글 삭제 오류:", error);
     return false;
   }
 }
-
-/** 
-function filterByKeyword(items, keyword) {
-  const lowered = keyword.toLowerCase();
-  return items.filter(({ title }) => title.toLowerCase().includes(lowered));
-}
-
-export function getMarkets(keyword) {
-  const markets = JSON.parse(localStorage.getItem("markets")) || [];
-  if (!keyword) return markets;
-  return filterByKeyword(markets, keyword);
-}
-
-export function getMarketBySlug(marketSlug) {
-  return markets.find((market) => market.slug === marketSlug);
-}
-*/
 
 const WISHLIST_KEY = "codethat-wishlist";
 
