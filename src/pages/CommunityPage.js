@@ -52,11 +52,11 @@ function CommunityPage() {
       try {
         const image = await fetchCommunityImage(communityId);
         if (isMounted) {
-          setImageUrl(image); // 이미지가 없으면 기본 이미지 사용
-          console.log("이미지 URL:", imageUrl); // 올바른 URL이 반환되는지 확인
+          setImageUrl(image);
         }
       } catch (error) {
-        console.error("커뮤니티 게시물 이미지 조회 오류:", error);
+        console.warn("이미지가 없는 게시물입니다.");
+        setImageUrl(null); // 이미지가 없음을 명시
       }
     }
 
@@ -92,7 +92,7 @@ function CommunityPage() {
                   <DateText value={created_at} />
                 </div>
               </div>
-              <Writer className={styles.author} writer={writer_id} />
+              <Writer className={styles.author} writerId={writer_id} />
             </div>
 
             {/* 이미지가 있을 경우 렌더링 */}
@@ -137,13 +137,35 @@ function CommunityPage() {
 }
 
 function Writer({ className, writerId }) {
-  if (!writerId) return null; // writer 또는 writer.name이 없을 경우 null 반환
+  const [writer, setWriter] = useState(null);
+
+  useEffect(() => {
+    async function fetchWriter() {
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_BASE_URL}/users/${writerId}`
+        );
+        const data = await response.json();
+        setWriter(data);
+      } catch (error) {
+        console.error("작성자 정보 가져오기 오류:", error);
+      }
+    }
+
+    fetchWriter();
+  }, [writerId]);
+
+  if (!writer) return null;
   return (
     <div className={classNames(className, styles.writer)}>
+      <Avatar
+        src={`${process.env.REACT_APP_BASE_URL}/users/${writerId}/avatar`}
+        alt={writer.name || "작성자"}
+        className={styles.avatar}
+      />
       <div className={styles.info}>
-        <div className={styles.name}>{writerId}</div>
+        <div className={styles.name}>{writer.name || "익명"}</div>
       </div>
-      <Avatar src={"profile.jpg"} alt={writerId} />
     </div>
   );
 }

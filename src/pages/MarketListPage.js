@@ -13,6 +13,7 @@ import styles from "./MarketListPage.module.css";
 import searchBarStyles from "../components/SearchBar.module.css";
 import searchIcon from "../assets/search.svg";
 import { useAuth } from "../contexts/AuthProvider"; // 사용자 인증 정보 가져오기
+import { getMarketById, deleteMarket, addWishlist } from "../api";
 
 function MarketListPage() {
   const [searchParam, setSearchParam] = useSearchParams();
@@ -34,12 +35,38 @@ function MarketListPage() {
   const [marketPosts, setMarketPosts] = useState([]);
   const [marketId, setMarketId] = useState(null); // 업로드 후 게시물 ID 저장
   const { user } = useAuth(); // 로그인한 사용자 정보
+  const [previewImage, setPreviewImage] = useState(null); // 미리보기 URL 상태
+
+  const handleDelete = async (id) => {
+    const success = await deleteMarket(id); // API 호출
+    if (success) {
+      setMarkets((prevMarkets) =>
+        prevMarkets.filter((market) => market.id !== id)
+      );
+      alert("게시물이 성공적으로 삭제되었습니다.");
+    } else {
+      alert("게시물 삭제에 실패했습니다.");
+    }
+  };
+
+  const handleEdit = (market) => {
+    setTitle(market.title); // 제목 설정
+    setContent(market.content); // 내용 설정
+    setCrop(market.crop); // 작물 설정
+    setPrice(market.price); // 가격 설정
+    setLocation(market.location); // 위치 설정
+    setFarmName(market.farm_name); // 농장 이름 설정
+    setCultivationPeriod(market.cultivation_period); // 재배 기간 설정
+    setHashtags(market.hashtags || []); // 해시태그 설정
+    setImage(null); // 이미지 미리보기 초기화
+  };
 
   // API로부터 마켓 게시물 목록 가져오는 함수
   async function fetchMarketPosts() {
     try {
       const posts = await getMarkets(keyword); // API 호출
-      setMarketPosts(posts); // 상태에 API 응답 데이터 설정
+      console.log("API에서 가져온 마켓 데이터:", posts); // 데이터 구조 확인
+      setMarkets(posts); // 상태에 API 응답 데이터 설정
     } catch (error) {
       console.error("마켓 게시물 가져오기 오류:", error);
       alert("마켓 데이터를 가져오는 중 오류가 발생했습니다.");
@@ -53,6 +80,14 @@ function MarketListPage() {
   useEffect(() => {
     console.log("markets 상태:", markets);
   }, [markets]); // markets 상태가 변경될 때마다 확인
+
+  useEffect(() => {
+    return () => {
+      if (previewImage) {
+        URL.revokeObjectURL(previewImage); // 메모리에서 Blob URL 해제
+      }
+    };
+  }, [previewImage]);
 
   const handleKeywordChange = (e) => setKeyword(e.target.value);
   const handleSubmit = (e) => {
@@ -85,6 +120,8 @@ function MarketListPage() {
     const file = e.target.files[0];
     if (file) {
       setImage(file);
+      const previewUrl = URL.createObjectURL(file); // Blob URL 생성
+      setPreviewImage(previewUrl); // 미리보기 URL 상태에 저장
     }
   };
 
@@ -119,18 +156,13 @@ function MarketListPage() {
         title,
         content,
         crop,
-        price,
+        price: Number(price), // price는 숫자로 변환하여 전달
         location,
         farmName,
         cultivationPeriod,
         hashtags,
-        writer: {
-          id: user.id,
-          name: user.name,
-          profile: {
-            photo: user.avatar || "default_avatar.svg",
-          },
-        },
+        writer_id: user.id, // 로그인된 사용자 ID
+        image: null, // 초기에는 이미지 없이 등록
       });
 
       if (newMarket) {
@@ -160,6 +192,7 @@ function MarketListPage() {
         setCultivationPeriod("");
         setHashtags([]);
         setImage(null);
+        setPreviewImage(null); // 미리보기 이미지 초기화
         setTagInput("");
 
         alert("게시물이 성공적으로 등록되었습니다.");
@@ -195,8 +228,12 @@ function MarketListPage() {
         <form className={styles.newPostForm} onSubmit={handlePostSubmit}>
           {/* 이미지 업로드 */}
           <div className={styles.imageUpload}>
-            {image ? (
-              <img src={image} alt="미리보기" className={styles.previewImage} />
+            {previewImage ? (
+              <img
+                src={previewImage}
+                alt="미리보기"
+                className={styles.previewImage}
+              />
             ) : (
               <div className={styles.imagePlaceholder}>이미지 미리보기</div>
             )}
@@ -298,7 +335,12 @@ function MarketListPage() {
       ) : (
         <div className={styles.marketList}>
           {markets.map((market) => (
-            <MarketItem key={market.id} market={market} />
+            <MarketItem
+              key={market.id}
+              market={market}
+              onDelete={handleDelete}
+              onEdit={handleEdit}
+            />
           ))}
         </div>
       )}

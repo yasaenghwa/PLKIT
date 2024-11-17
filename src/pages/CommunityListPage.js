@@ -19,6 +19,7 @@ import searchIcon from "../assets/search.svg";
 
 function CommunityItem({ community, onDelete, onEdit }) {
   const { user } = useAuth();
+  const BASE_URL = process.env.REACT_APP_BASE_URL;
 
   return (
     <Card className={styles.communityItem} key={community.id}>
@@ -36,10 +37,11 @@ function CommunityItem({ community, onDelete, onEdit }) {
       </div>
       <div className={styles.writer}>
         <Avatar
-          src={community.writer?.profile?.photo || "default_avatar.svg"}
+          src={`${BASE_URL}/users/${community.writer_id}/avatar`}
           alt={community.writer?.name || "작성자"}
           className={styles.avatar}
         />
+        <p>{community.writer?.name || "익명"}</p>
       </div>
       <div className={styles.actions}>
         {community.writer_id === user.id && (
