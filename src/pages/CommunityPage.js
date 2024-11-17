@@ -137,13 +137,35 @@ function CommunityPage() {
 }
 
 function Writer({ className, writerId }) {
-  if (!writerId) return null; // writer 또는 writer.name이 없을 경우 null 반환
+  const [writer, setWriter] = useState(null);
+
+  useEffect(() => {
+    async function fetchWriter() {
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_BASE_URL}/users/${writerId}`
+        );
+        const data = await response.json();
+        setWriter(data);
+      } catch (error) {
+        console.error("작성자 정보 가져오기 오류:", error);
+      }
+    }
+
+    fetchWriter();
+  }, [writerId]);
+
+  if (!writer) return null;
   return (
     <div className={classNames(className, styles.writer)}>
+      <Avatar
+        src={`${process.env.REACT_APP_BASE_URL}/users/${writerId}/avatar`}
+        alt={writer.name || "작성자"}
+        className={styles.avatar}
+      />
       <div className={styles.info}>
-        <div className={styles.name}>{writerId}</div>
+        <div className={styles.name}>{writer.name || "익명"}</div>
       </div>
-      <Avatar src={"profile.jpg"} alt={writerId} />
     </div>
   );
 }

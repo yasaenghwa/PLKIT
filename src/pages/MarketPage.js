@@ -70,7 +70,7 @@ function MarketPage() {
       <h1 className={styles.title}>{market.title}</h1>
       {market.image ? (
         <img
-          src={`${BASE_URL}/${market.image}`}
+          src={`${BASE_URL}/markets/${market.id}/image`}
           alt={market.title}
           className={styles.image}
         />

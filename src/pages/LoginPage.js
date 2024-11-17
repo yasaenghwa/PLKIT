@@ -68,7 +68,6 @@ function LoginPage() {
           onChange={handleChange}
         />
         <LogButton className={styles.LogButton}>로그인</LogButton>
-        <HorizontalRule className={styles.HorizontalRule}>또는</HorizontalRule>
         <div>
           회원이 아니신가요? <Link to="/register">회원가입하기</Link>
         </div>

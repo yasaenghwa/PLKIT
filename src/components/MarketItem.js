@@ -14,7 +14,7 @@ function MarketItem({ market, onDelete, onEdit }) {
       <div className={styles.thumb}>
         {market.image ? (
           <img
-            src={`${BASE_URL}/${market.image}`}
+            src={`${BASE_URL}/markets/${market.id}/image`}
             alt={`${market.title} 이미지`}
             className={styles.image}
           />

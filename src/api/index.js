@@ -329,13 +329,21 @@ export async function updateMarket(marketId, { title, content }) {
 }
 
 // 5. 마켓 게시물 삭제 함수
+// src/api/index.js
 export async function deleteMarket(marketId) {
   try {
-    await axios.delete(`${BASE_URL}/markets/${marketId}`);
-    return true;
+    const response = await axios.delete(`${BASE_URL}/markets/${marketId}`, {
+      headers: {
+        accept: "application/json", // 필요한 경우 헤더 설정
+      },
+    });
+    if (response.status === 204) {
+      console.log("마켓 게시물 삭제 성공");
+      return true; // 성공 시 true 반환
+    }
   } catch (error) {
     console.error("마켓 게시물 삭제 오류:", error);
-    return false;
+    return false; // 실패 시 false 반환
   }
 }
 
