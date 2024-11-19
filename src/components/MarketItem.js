@@ -49,22 +49,23 @@ function MarketItem({ market, onDelete, onEdit }) {
         )}
       </div>
       {/* 수정 및 삭제 버튼 */}
-      {user && market.writer && market.writer.id === user.id && (
-        <div className={styles.actions}>
-          <button
-            onClick={() => onEdit && onEdit(market)}
-            className={styles.editButton}
-          >
-            수정
-          </button>
-          <button
-            onClick={() => onDelete && onDelete(market.id)}
-            className={styles.deleteButton}
-          >
-            삭제
-          </button>
-        </div>
-      )}
+      {user &&
+        market.writer_id === user.id && ( // writer_id와 로그인 사용자 id 비교
+          <div className={styles.actions}>
+            <button
+              onClick={() => onEdit && onEdit(market)}
+              className={styles.editButton}
+            >
+              수정
+            </button>
+            <button
+              onClick={() => onDelete && onDelete(market.id)}
+              className={styles.deleteButton}
+            >
+              삭제
+            </button>
+          </div>
+        )}
     </Card>
   );
 }

@@ -1,7 +1,8 @@
 import axios from "axios";
+const BASE_URL = process.env.REACT_APP_BASE_URL; // .env에서 가져온 서버 URL
 
 const instance = axios.create({
-  baseURL: "http://plkit.site",
+  baseURL: `${BASE_URL}`,
 });
 
 instance.interceptors.request.use((config) => {
