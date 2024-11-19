@@ -52,13 +52,13 @@ export async function fetchCommunityImage(communityId) {
 // 1. 커뮤니티 목록 가져오기 (API 요청으로 변경)
 export async function getCommunitys(keyword) {
   try {
-    const response = await axios.get(`${BASE_URL}/communities`, {
+    const response = await axios.get(`${BASE_URL}/communities/`, {
       params: { keyword },
     });
-    return response.data;
+    return response.data || []; // null 반환 방지
   } catch (error) {
-    console.error("커뮤니티 목록 가져오기 오류:", error);
-    return [];
+    console.error("커뮤니티 데이터 가져오기 오류:", error);
+    return []; // 오류 발생 시 빈 배열 반환
   }
 }
 
@@ -224,7 +224,15 @@ export function addMarket({
 }
   */
 
-// 1. 마켓 게시물 추가 함수 (JWT 인증 없이)
+// JWT 토큰을 Authorization 헤더에 추가하는 유틸리티 함수
+const getAuthHeaders = () => ({
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+    "Content-Type": "application/json",
+  },
+});
+
+/** 1. 새로운 마켓 게시글 추가 */
 export async function addMarket({
   title,
   content,
@@ -234,11 +242,10 @@ export async function addMarket({
   farmName,
   cultivationPeriod,
   hashtags = [],
-  writer_id, // writer_id를 명시적으로 추가
-  image, // image는 FormData로 업로드될 가능성
+  writer_id, // writer_id 명시적 추가
+  image,
 }) {
   try {
-    // 1. Market 텍스트 데이터 먼저 전송
     const response = await axios.post(
       `${BASE_URL}/markets/`,
       {
@@ -250,28 +257,22 @@ export async function addMarket({
         farm_name: farmName,
         cultivation_period: cultivationPeriod,
         hashtags,
-        writer_id, // writer_id 포함
+        writer_id,
       },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
+      getAuthHeaders() // JWT 인증 추가
     );
 
-    // 2. Market 생성 성공 후 image 업로드 처리
     const newMarket = response.data;
-    if (image) {
-      const formData = new FormData();
-      formData.append("file", image);
 
+    // 이미지 업로드 처리
+    if (image) {
       await uploadMarketImage(newMarket.id, image);
     }
 
-    return newMarket; // 최종 생성된 마켓 데이터 반환
+    return newMarket;
   } catch (error) {
     console.error("마켓 게시물 추가 오류:", error);
-    return null;
+    throw error;
   }
 }
 
@@ -306,48 +307,34 @@ export async function getMarketById(marketId) {
   }
 }
 
-// 4. 마켓 게시물 수정 함수
-export async function updateMarket(marketId, { title, content }) {
+/** 4. 특정 마켓 게시물 수정 */
+export async function updateMarket(marketId, updatedData) {
   try {
     const response = await axios.patch(
       `${BASE_URL}/markets/${marketId}`,
-      {
-        title,
-        content,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
+      updatedData,
+      getAuthHeaders() // JWT 인증 추가
     );
     return response.data;
   } catch (error) {
     console.error("마켓 게시물 수정 오류:", error);
-    return null;
+    throw error;
   }
 }
 
-// 5. 마켓 게시물 삭제 함수
-// src/api/index.js
+/** 5. 특정 마켓 게시물 삭제 */
 export async function deleteMarket(marketId) {
   try {
-    const response = await axios.delete(`${BASE_URL}/markets/${marketId}`, {
-      headers: {
-        accept: "application/json", // 필요한 경우 헤더 설정
-      },
-    });
-    if (response.status === 204) {
-      console.log("마켓 게시물 삭제 성공");
-      return true; // 성공 시 true 반환
-    }
+    await axios.delete(`${BASE_URL}/markets/${marketId}`, getAuthHeaders());
+    console.log("마켓 게시물 삭제 성공");
+    return true;
   } catch (error) {
     console.error("마켓 게시물 삭제 오류:", error);
-    return false; // 실패 시 false 반환
+    return false;
   }
 }
 
-// 6. 마켓 게시물 이미지 업로드 함수
+/** 6. 마켓 게시물 이미지 업로드 */
 export async function uploadMarketImage(marketId, file) {
   const formData = new FormData();
   formData.append("file", file);
@@ -358,6 +345,7 @@ export async function uploadMarketImage(marketId, file) {
       formData,
       {
         headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           "Content-Type": "multipart/form-data",
         },
       }
@@ -365,17 +353,15 @@ export async function uploadMarketImage(marketId, file) {
     return response.data;
   } catch (error) {
     console.error("마켓 게시물 이미지 업로드 오류:", error);
-    return null;
+    throw error;
   }
 }
 
-// 7. 마켓 게시물 이미지 조회 함수
+/** 7. 마켓 게시물 이미지 조회 */
 export async function fetchMarketImage(marketId) {
   try {
     const response = await axios.get(`${BASE_URL}/markets/${marketId}/image`, {
-      headers: {
-        accept: "*/*",
-      },
+      headers: { accept: "*/*" },
       responseType: "blob",
     });
     return URL.createObjectURL(response.data);

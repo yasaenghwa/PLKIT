@@ -10,6 +10,7 @@ import Lined from "../components/Lined";
 import Warn from "../components/Warn";
 import styles from "./CommunityPage.module.css";
 import { useAuth } from "../contexts/AuthProvider"; // AuthProvider에서 user 가져오기
+const BASE_URL = process.env.REACT_APP_BASE_URL;
 
 // CommunityPage.js에서 기본 이미지 설정
 
@@ -137,34 +138,37 @@ function CommunityPage() {
 }
 
 function Writer({ className, writerId }) {
-  const [writer, setWriter] = useState(null);
+  const [writerName, setWriterName] = useState("익명");
 
   useEffect(() => {
-    async function fetchWriter() {
+    async function fetchWriterName() {
       try {
-        const response = await fetch(
-          `${process.env.REACT_APP_BASE_URL}/users/${writerId}`
-        );
-        const data = await response.json();
-        setWriter(data);
+        const response = await fetch(`${BASE_URL}/users/${writerId}/name`);
+        if (response.ok) {
+          const data = await response.json();
+          setWriterName(data.name || "익명");
+        } else {
+          console.warn("작성자 이름 가져오기 실패:", response.status);
+        }
       } catch (error) {
-        console.error("작성자 정보 가져오기 오류:", error);
+        console.error("작성자 이름 가져오기 오류:", error);
       }
     }
 
-    fetchWriter();
+    if (writerId) {
+      fetchWriterName();
+    }
   }, [writerId]);
 
-  if (!writer) return null;
   return (
     <div className={classNames(className, styles.writer)}>
       <Avatar
-        src={`${process.env.REACT_APP_BASE_URL}/users/${writerId}/avatar`}
-        alt={writer.name || "작성자"}
+        src={`${BASE_URL}/users/${writerId}/avatar`}
+        alt={writerName}
         className={styles.avatar}
       />
       <div className={styles.info}>
-        <div className={styles.name}>{writer.name || "익명"}</div>
+        <div className={styles.name}>{writerName}</div>
       </div>
     </div>
   );
