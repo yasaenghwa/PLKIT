@@ -17,12 +17,14 @@ The PLKIT-HW document explains how to design a prototype of the R&D module smart
 
 
 ## Layout
-![Layout](https://github.com/user-attachments/assets/d6a8a958-abbc-4e55-9e2a-9bdd0ef106d4)
+![Layout](https://github.com/user-attachments/assets/64c991fd-f825-4c49-a366-f9cd345c22cb)
+
 
 
 
 ## 3D Modeling
-![3D_Modeling](https://github.com/user-attachments/assets/cf3a104f-3532-4c0b-a584-23614b0dfd3c)
+![3D_Modeling](https://github.com/user-attachments/assets/4bc3bfb2-86b6-470d-bcf3-b8d77a05d5dc)
+
 
 
 
@@ -120,21 +122,17 @@ The PLKIT-HW document explains how to design a prototype of the R&D module smart
 
 ## Prototype
 ### Frame
-  
-![Frame](https://github.com/user-attachments/assets/a70fa3ef-e3a9-408e-abf2-d94e5f4b8bf4)
 
 ### Module
-  
-![Module](https://github.com/user-attachments/assets/d69b4c3b-db7e-4e1a-a68a-9724f92aa648)
 
 ### Module connection method
 - Power Connection
   - connected</br>
-    ![Power Connection_connected](https://github.com/user-attachments/assets/ce3be448-0bcd-4ba8-a194-2ba8386ceafa)
+
   - disconnected</br>
-    ![Power Connection_disconnected](https://github.com/user-attachments/assets/b092ccfc-dcd9-4dd2-9696-9916cecbb2b1)
+
     
 - Fluid Connection
  		- connected</br>
-   ![Fluid connection_connected](https://github.com/user-attachments/assets/d655941c-fc06-4411-a0ee-8da15e5fc357)
-  - disconnected
+
+  - disconnected</br>
