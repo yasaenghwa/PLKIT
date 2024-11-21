@@ -133,6 +133,6 @@ The PLKIT-HW document explains how to design a prototype of the R&D module smart
 
     
 - Fluid Connection
- 		- connected</br>
+ 	- connected</br>
 
   - disconnected</br>
