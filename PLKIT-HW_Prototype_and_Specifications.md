@@ -122,24 +122,24 @@ The PLKIT-HW document explains how to design a prototype of the R&D module smart
 
 ## Prototype
 ### Frame
-![frame](https://github.com/user-attachments/assets/6e642f39-6e9d-4742-845a-108cccb2e092)
+![frame](https://github.com/user-attachments/assets/6e642f39-6e9d-4742-845a-108cccb2e092){: width="100" height="100"}
 
 ### Module
-![module](https://github.com/user-attachments/assets/e87d6f9a-8c58-4337-9c73-c003b9fe42da)
+![module](https://github.com/user-attachments/assets/e87d6f9a-8c58-4337-9c73-c003b9fe42da){: width="100" height="100"}
 
 
 ### Module connection method
 - Power Connection
   - connected</br>
-![Power_connected](https://github.com/user-attachments/assets/d4990391-ba12-4f1d-b989-9ac842c95b0b)
+![Power_connected](https://github.com/user-attachments/assets/d4990391-ba12-4f1d-b989-9ac842c95b0b){: width="100" height="100"}
 
   - disconnected</br>
-![Power_disconnected](https://github.com/user-attachments/assets/a01b62d1-46c7-4bf7-a825-ac51d8c82283)
+![Power_disconnected](https://github.com/user-attachments/assets/a01b62d1-46c7-4bf7-a825-ac51d8c82283){: width="100" height="100"}
 
     
 - Fluid Connection
  	- connected</br>
-![Fluid_connected](https://github.com/user-attachments/assets/910b2c7d-beae-4786-8565-196311225d82)
+![Fluid_connected](https://github.com/user-attachments/assets/910b2c7d-beae-4786-8565-196311225d82){: width="100" height="100"}
 
   - disconnected</br>
-![Fluid_disconnected](https://github.com/user-attachments/assets/d565f658-afab-4ef3-aa76-5c378b424fa3)
+![Fluid_disconnected](https://github.com/user-attachments/assets/d565f658-afab-4ef3-aa76-5c378b424fa3){: width="100" height="100"}
