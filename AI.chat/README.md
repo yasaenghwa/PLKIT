@@ -18,7 +18,49 @@
 
 ## Overview
 
-![Full chat](full_chat.png)
+```mermaid
+flowchart TD
+    %% 시작
+    A[사용자] -->|HTTP POST 요청| B[/chat 엔드포인트/]
+    
+    %% 요청 처리
+    B --> C[요청 본문 파싱]
+    C --> D{유효성 검사}
+    D -->|유효| E[메시지 추출]
+    D -->|유효하지 않음| F[400 오류 반환]
+    
+    %% 시스템 메시지 추가
+    E --> G{시스템 메시지 포함 여부 확인}
+    G -->|포함됨| H[사용자 입력 추출]
+    G -->|포함되지 않음| I[시스템 메시지 추가]
+    I --> H
+    
+    %% 사용자 입력 처리
+    H --> J{입력 내용 확인}
+    J -->|비어 있음| K[400 오류 반환]
+    J -->|유효| L[사용자 입력 로그 기록]
+    
+    %% OpenAI API 호출
+    L --> M[OpenAI API 호출]
+    M --> N{API 응답 확인}
+    N -->|성공| O[응답 내용 추출 및 로그 기록]
+    N -->|실패| P[500 오류 반환]
+    
+    %% 응답 반환
+    O --> Q[응답 반환]
+    Q --> A
+    
+    %% 로그 엔드포인트
+    A -->|GET /logs 요청| R[/logs 엔드포인트/]
+    R --> S[로그 파일 읽기]
+    S --> T[최근 1000자 반환]
+    T --> A
+    
+    %% 에러 처리
+    F --> U[400 Bad Request]
+    K --> U
+    P --> V[500 Internal Server Error]
+```
 PLKIT-AI.chat is a chatbot application that emulates a **Smart Farm Expert**. Built on FastAPI, this application leverages OpenAI's GPT-4 API to facilitate natural and engaging conversations with users. By setting up user personas, the chatbot provides professional responses tailored to specific fields. Additionally, it manages conversation logs for future analysis and monitoring. Designed for seamless deployment, PLKIT-AI.chat can be easily hosted on cloud services such as AWS EC2.
 
 ## Project Structure
