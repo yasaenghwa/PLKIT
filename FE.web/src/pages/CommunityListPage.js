@@ -17,11 +17,42 @@ import styles from "./CommunityListPage.module.css";
 import searchBarStyles from "../components/SearchBar.module.css";
 import searchIcon from "../assets/search.svg";
 
+const BASE_URL = process.env.REACT_APP_BASE_URL;
+
 function CommunityItem({ community, onDelete, onEdit }) {
-  const { user } = useAuth();
+  const [writerName, setWriterName] = useState("익명");
+  const { user } = useAuth(); // 현재 로그인한 사용자 정보 가져오기
+
+  useEffect(() => {
+    async function fetchWriterName() {
+      try {
+        const response = await fetch(
+          `${BASE_URL}/users/${community.writer_id}/name`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setWriterName(data.name || "익명");
+        } else {
+          console.warn("작성자 이름 가져오기 실패:", response.status);
+        }
+      } catch (error) {
+        console.error("작성자 이름 가져오기 오류:", error);
+      }
+    }
+
+    if (community.writer_id) {
+      fetchWriterName();
+    }
+  }, [community.writer_id]);
+
+  if (!community) return null;
+
+  const isOwner = user && user.id === community.writer_id; // 작성자와 현재 로그인한 사용자를 비교
 
   return (
-    <Card className={styles.communityItem} key={community.id}>
+    <Card className={styles.communityItem}>
+      {" "}
+      {/* Card로 감싸기 */}
       <div className={styles.info}>
         <p className={styles.title}>
           <Link to={`/communities/${community.id}`}>{community.title}</Link>
@@ -30,19 +61,19 @@ function CommunityItem({ community, onDelete, onEdit }) {
           )}
         </p>
         <p className={styles.date}>
-          <DateText value={community.created_at} />{" "}
-          {/* createdAt을 created_at으로 수정 */}
+          <DateText value={community.created_at} />
         </p>
       </div>
       <div className={styles.writer}>
         <Avatar
-          src={community.writer?.profile?.photo || "default_avatar.svg"}
-          alt={community.writer?.name || "작성자"}
+          src={`${BASE_URL}/users/${community.writer_id}/avatar`}
+          alt={writerName}
           className={styles.avatar}
         />
+        <p className={styles.writerName}>{writerName}</p>
       </div>
       <div className={styles.actions}>
-        {community.writer_id === user.id && (
+        {isOwner && ( // 로그인한 사용자와 작성자가 같을 때만 버튼 표시
           <>
             <button onClick={() => onEdit(community)}>수정</button>
             <button onClick={() => onDelete(community.id)}>삭제</button>
@@ -67,8 +98,14 @@ function CommunityListPage() {
   // 커뮤니티 목록 가져오기
   useEffect(() => {
     async function fetchCommunities() {
-      const data = await getCommunitys(keyword);
-      setCommunitys(data);
+      try {
+        const data = await getCommunitys(keyword);
+        // 유효한 데이터만 필터링
+        setCommunitys(data.filter((community) => community !== null));
+      } catch (error) {
+        console.error("커뮤니티 목록 불러오기 오류:", error);
+        setCommunitys([]);
+      }
     }
     fetchCommunities();
   }, [keyword]);

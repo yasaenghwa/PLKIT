@@ -56,15 +56,10 @@ function MyPage() {
   async function getMyLinks() {
     try {
       const res = await axios.get("/users/me/links");
-      const nextLinks = res.data;
-      setLinks(nextLinks);
+      console.log("API 응답 데이터:", res.data); // 응답 데이터 확인
+      setLinks(Array.isArray(res.data) ? res.data : []);
     } catch (error) {
-      if (error.response && error.response.status === 404) {
-        console.warn("404 에러 무시: 요청한 리소스를 찾을 수 없습니다.");
-        return null; // 404 에러 무시하고 null 반환
-      } else {
-        throw error; // 다른 에러는 그대로 throw하여 화면에 표시
-      }
+      setLinks([]); // 안전하게 빈 배열 설정
     }
   }
 
