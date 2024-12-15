@@ -22,7 +22,44 @@
 
 ## Overview
 
-![Full Analysis](full_analysis.png)
+```mermaid
+graph TD
+    %% 사용자와 시스템 간의 주요 상호작용
+    A[사용자] -->|모델 업로드 요청| B[Nginx]
+    B -->|프록시 요청| C[FastAPI 서버]
+    C -->|파일 저장| D[models/ 디렉토리]
+    C -->|모델 로드| E[ModelManager]
+    E -->|모델 등록| F[available_models]
+    
+    A -->|모델 목록 조회 요청| B
+    B -->|프록시 응답| A
+    
+    A -->|예측 요청| B
+    B -->|프록시 요청| C
+    C -->|모델 가져오기| E
+    E -->|모델 예측| G[예측 수행]
+    G -->|예측 결과 반환| C
+    C -->|프록시 응답| A
+    
+    %% 센서 데이터 업로드 및 MongoDB와의 상호작용
+    H[센서] -->|데이터 업로드| I[MongoDB]
+    J[Model Training Script] -->|데이터 가져오기| I
+    J -->|데이터 전처리| K[app/utils.py]
+    J -->|모델 학습 및 저장| D
+    D -->|모델 로드| E
+    
+    %% 인프라 구성 요소
+    subgraph 인프라
+        L[EC2 인스턴스] --> B
+        L --> H
+        L --> J
+    end
+    
+    %% 스타일 정의
+    classDef api fill:#f9f,stroke:#333,stroke-width:2px;
+    class A,B,C,G api;
+
+```
 
 **PLKIT-AI.analysis** is a FastAPI-based application designed for managing and deploying time series forecasting models using TSMixer. It provides functionalities to upload, manage, and perform predictions with TSMixer models, specifically tailored for single data point predictions. The application ensures secure cross-origin requests and maintains robust logging for monitoring and debugging purposes.
 
