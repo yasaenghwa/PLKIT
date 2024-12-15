@@ -124,6 +124,21 @@ async def get_user_avatar_by_id(
 
     return FileResponse(avatar_path)
 
+@router.get("/{id}/name", response_model=dict)
+async def get_user_name_by_id(
+    id: int, db: Session = Depends(database.get_db)
+):
+    """
+    특정 사용자의 이름을 반환합니다.
+    - `id`: 사용자 ID
+    """
+    user = crud.user.get_user_by_id(db, user_id=id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="사용자를 찾을 수 없습니다."
+        )
+    return {"name": user.name}
+
 ### 1. POST: Add a new user link
 @router.post("/link", response_model=UserLinkResponse, status_code=status.HTTP_201_CREATED)
 async def add_user_link(
