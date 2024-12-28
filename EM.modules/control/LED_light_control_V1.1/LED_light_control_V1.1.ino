@@ -7,8 +7,8 @@
 #include <BLEScan.h>
 
 // 릴레이 제어 핀 설정
-const int ledRelayPin = 6;  // LED 릴레이 핀 (GPIO 6)
-const int fanRelayPin = 17;  // Fan 릴레이 핀 (GPIO 17)
+const int ledRelayPin = 15;  // LED 릴레이 핀 (GPIO 6)
+const int fanRelayPin = 3;  
 
 // BLE 설정
 #define SERVICE_UUID           "736D6172-7462-6F61-7264-5F706C6B6974"  // Service UUID

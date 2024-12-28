@@ -7,7 +7,7 @@
 #include <BLEScan.h>
 
 // 릴레이 제어 핀 설정
-const int heaterRelayPin = 17;  
+const int heaterRelayPin = 7;  
 
 // BLE 설정
 #define SERVICE_UUID           "736D6172-7462-6F61-7264-5F706C6B6974"  // Service UUID
@@ -44,7 +44,7 @@ void connectToWiFi(const char* ssid, const char* password) {
 // MQTT 재연결 함수
 void reconnect() {
   while (!client.connected()) {
-    Serial.print("Attempting MQTT connection...");
+    //Serial.print("Attempting MQTT connection...");
     if (client.connect("ESP32Client")) {
       // Heater 제어 토픽 구독
       client.subscribe("PLKIT/control/heater", 1);  // Heater 제어 토픽

@@ -52,9 +52,9 @@ void connectToWiFi(const char* ssid, const char* password) {
 // MQTT 재연결 함수
 void reconnect() {
   while (!client.connected()) {
-    Serial.print("Attempting MQTT connection...");
+    //Serial.print("Attempting MQTT connection...");
     if (client.connect("ESP32Client")) {
-      Serial.println("connected");
+      //Serial.println("connected");
       client.subscribe("PLKIT/control/Plus_water_pump", 1);  // Water pump 제어 토픽 구독
     } else {
       delay(5000);  // 연결 실패 시 5초 후 재시도
