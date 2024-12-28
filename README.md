@@ -54,6 +54,20 @@
 
 PLKIT combines cutting-edge technologies like BLE, FastAPI, Node-RED, and Enact UI to offer a robust smart farm ecosystem. It enables seamless farm management, from real-time data monitoring and device control to community-driven data sharing and AI analysis. The goal is to optimize agricultural processes and provide an accessible platform for users to manage, analyze, and share valuable farming data.
 
+---
+
+## System Architecture
+
+> **Software Architecture**  
+> The software architecture illustrates the relationships between backend services, frontend dashboards, embedded modules, and external APIs.  
+> ![Software Architecture](./.docs/images/SW-Architecture.png)
+
+> **Hardware Architecture**  
+> The hardware architecture represents the smart farm's physical components, including sensors, controllers, and their integration with the software stack.  
+> ![Hardware Architecture](./.docs/images/HW-Architecture.png)
+
+---
+
 ## Project Structure
 
 ```
